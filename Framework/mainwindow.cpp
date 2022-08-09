@@ -6,6 +6,7 @@
 #include <windows.h>
 #include <QJsonParseError>
 #include <QJsonObject>
+#include <QPluginLoader>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -24,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->label->setFrameStyle(QFrame::Box);
 
     InitGlobalParams();
+    LoadPlugins();
 
     // Disable maximize button
     this->setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
@@ -133,5 +135,56 @@ void MainWindow::InitGlobalParams()
             }
         }
     }
+}
+
+quint8 MainWindow::LoadPlugins()
+{
+    quint8 count = 0;
+
+    // Change to the directory where the plugin is located
+    QDir pluginsDir(qApp->applicationDirPath());
+    if (pluginsDir.dirName().toLower() == "debug"
+            || pluginsDir.dirName().toLower() == "release")
+    {
+        pluginsDir.cdUp();
+        pluginsDir.cdUp();
+    }
+    pluginsDir.cd("plugins");
+    if(!pluginsDir.cd("plugin"))
+        return count;
+
+    foreach (QString fileName, pluginsDir.entryList(QDir::Files))
+    {
+        QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
+        QObject* plugin = pluginLoader.instance();
+        if(plugin)
+        {
+            auto testInterface = qobject_cast<BusTestInterface*>(plugin);
+            if(testInterface)
+            {
+                // The framework passes configuration parameters to the plugin
+                if(testInterface->PluginName().toLower() == "uart")
+                {
+//                    testInterface->SetTabNum(uartTabNum);
+                }
+                else if(testInterface->PluginName().toLower() == "udp")
+                    testInterface->SetTabNum(udpUnicastTabNum);
+                ++count;
+                tiList.append(testInterface);
+                // Generate ToolBar after loading the plugin
+                AddToolBar(testInterface);
+            }
+        }
+    }
+    qInfo().noquote() << tr("Number of loaded plugins：%1").arg(count);
+    return count;
+}
+
+void MainWindow::AddToolBar(BusTestInterface *ti)
+{
+    // Toolbar button icons and text
+    QAction* action = new QAction(ti->PluginIcon(), ti->PluginName());
+    action->setToolTip(ti->PluginTooltip());
+    ui->toolBar->addAction(action);
 }
 

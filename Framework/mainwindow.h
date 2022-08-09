@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QGridLayout>
 #include <QPushButton>
+#include "BusTestInterface.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -26,6 +27,10 @@ private slots:
 private:
     // Use JSON file to configure global parameters
     void InitGlobalParams();
+    // Load plugin
+    quint8 LoadPlugins();
+    void AddToolBar(BusTestInterface* ti);
+
 
     Ui::MainWindow *ui;
     // Grid layout manager, interface plugin widget occupies 4 rows and 1 column,
@@ -37,5 +42,8 @@ private:
     bool isTopMost = false;
     // Number of UDP unicast communication forms
     quint16 udpUnicastTabNum = 1;
+    // Bus Test Interface List
+    QList<BusTestInterface*> tiList;
+
 };
 #endif // MAINWINDOW_H
