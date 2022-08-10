@@ -23,6 +23,8 @@ private slots:
     void TopMost_Clicked();
     // "About" button slot function
     void About_Clicked();
+    // Toolbar trigger slot function
+    void actionTriggered(QAction *action);
 
 private:
     // Use JSON file to configure global parameters
@@ -44,6 +46,8 @@ private:
     quint16 udpUnicastTabNum = 1;
     // Bus Test Interface List
     QList<BusTestInterface*> tiList;
+    // Record the currently displayed test plugin
+    BusTestInterface* curTi = nullptr;
 
 };
 #endif // MAINWINDOW_H

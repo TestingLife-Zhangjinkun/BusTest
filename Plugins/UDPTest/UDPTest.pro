@@ -15,10 +15,12 @@ INCLUDEPATH    += ../../framework
 DESTDIR     = ../Plugin
 
 SOURCES += \
+    udpform.cpp \
     udptest.cpp
 
 HEADERS += \
     UDPTest_global.h \
+    udpform.h \
     udptest.h
 
 # Default rules for deployment.
@@ -26,3 +28,6 @@ unix {
     target.path = /usr/lib
 }
 !isEmpty(target.path): INSTALLS += target
+
+FORMS += \
+    udpform.ui

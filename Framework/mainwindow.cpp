@@ -26,6 +26,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     InitGlobalParams();
     LoadPlugins();
+    // Set the icon and text of the toolbar button to display together
+    ui->toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    // Click to call the plugin
+    connect(ui->toolBar, &QToolBar::actionTriggered,
+            this, &MainWindow::actionTriggered);
 
     // Disable maximize button
     this->setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
@@ -52,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     topMost->setIconSize(QSize(20, 20));
     topMost->setToolTip("Set this window to always be displayed at the top.");
     topMost->setFixedSize(20, 20);
-    // 左上右下
+    // left top right bottom
     topMost->setContentsMargins(0, 0, 0, 0);
     connect(topMost, SIGNAL(clicked()), this, SLOT(TopMost_Clicked()));
     ui->statusbar->addWidget(topMost);
@@ -104,6 +109,30 @@ void MainWindow::TopMost_Clicked()
 void MainWindow::About_Clicked()
 {
     qInfo().noquote() << "about dialog, processed later."; // 20220809
+}
+
+void MainWindow::actionTriggered(QAction *action)
+{
+    // Traversing the list of test plugins
+    foreach(BusTestInterface* ti, tiList)
+    {
+        if(QString::compare(ti->PluginName(), action->text(), Qt::CaseInsensitive) == 0)
+        {
+            // If the current test plugin is not a null pointer, hide it;
+            // otherwise, it will be cascaded after calling the addWidget() function.
+            if(curTi != nullptr)
+                curTi->PluginWidget()->hide();
+            else
+                // hide welcome window
+                ui->label->hide();
+            gridLayout->setContentsMargins(5, 5, 5, 0);
+            gridLayout->addWidget(ti->PluginWidget(), 0, 0, 5, 1);
+            ti->PluginWidget()->show();
+            // Record the current test plugin
+            curTi = ti;
+            break;
+        }
+    }
 }
 
 // Parse plugin configuration file
