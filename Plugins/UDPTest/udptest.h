@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <BusTestInterface.h>
 #include "ui_udpform.h"
+#include "unicastform.h"
 
 class UDPTEST_EXPORT UDPTest
         :public QWidget
@@ -26,8 +27,17 @@ public:
     virtual void SetTabNum(quint16) override;
 
 private:
+    // Initialize UDP widget
+    void InitUDPWidget();
+
     // Manually associate UI
     Ui::UDPForm* ui;
+    // The number of unicast communication forms
+    quint16 unicastFormNum = 1;
+    // Unicast Communication Form
+    UnicastForm *unicastForm = nullptr;
+
+
 };
 
 #endif // UDPTEST_H

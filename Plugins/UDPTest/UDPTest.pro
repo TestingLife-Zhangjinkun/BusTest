@@ -16,12 +16,14 @@ DESTDIR     = ../Plugin
 
 SOURCES += \
     udpform.cpp \
-    udptest.cpp
+    udptest.cpp \
+    unicastform.cpp
 
 HEADERS += \
     UDPTest_global.h \
     udpform.h \
-    udptest.h
+    udptest.h \
+    unicastform.h
 
 # Default rules for deployment.
 unix {
@@ -30,4 +32,5 @@ unix {
 !isEmpty(target.path): INSTALLS += target
 
 FORMS += \
-    udpform.ui
+    udpform.ui \
+    unicastform.ui

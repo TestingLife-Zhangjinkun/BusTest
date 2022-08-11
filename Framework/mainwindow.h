@@ -43,7 +43,7 @@ private:
     // Top flag, default false
     bool isTopMost = false;
     // Number of UDP unicast communication forms
-    quint16 udpUnicastTabNum = 1;
+    quint16 udpUnicastFormNum = 1;
     // Bus Test Interface List
     QList<BusTestInterface*> tiList;
     // Record the currently displayed test plugin

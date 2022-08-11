@@ -1,0 +1,9 @@
+{
+    "_Comment_UartTabNum": "(串口Tab标签页的数量，每一个标签页打开一个串口)",
+    "UartTabNum": 4,	
+    "_Comment_RunningSystem": "(PCM_FM, PPK_AM)",
+    "RunningSystem": "PCM_FM",
+    "_Comment_SimulateCpciBoard": "true, false",
+    "SimulateCpciBoard": false,
+	"_Comment_": "(注意：最后一项后面不加逗号,)"
+}

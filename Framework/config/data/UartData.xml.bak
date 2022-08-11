@@ -1,0 +1,36 @@
+<COM>
+    <packet name="电压设置标准电" baudRate="38400" dataBit="8" parityBit="None" stopBit="1">
+    	<receive>
+            <data>11 22 33 44</data>
+        </receive>
+        <send delay="50" frequency="1">
+            <data>0E 00 03 00 00 00 00 00 04 00 51 00 00 00</data>
+        </send>
+        <send delay="50" frequency="1">
+            <data>12 00 04 00 00 00 00 00 08 00 51 00 00 00 00 00 00 00</data>
+        </send>
+    </packet>
+    
+    <packet name="电压设置应急电" baudRate="0">
+        <receive>
+            <data>12 34</data>
+        </receive>
+        <send frequency="1">
+            <data>77 77 77 77</data>
+        </send>
+        <send frequency="2">
+            <data>88 88 88 88</data>
+        </send>
+    </packet>
+     
+    <packet name="调试">
+    	<receive>
+            <data>16 00 83 00 00 00 00 00 0C 00 97 18 52 38 00 00 00 00 00 00 00 00</data>
+        </receive>
+        <send delay="50" frequency="3">
+            <data>16 00 03 00 00 00 00 00 0C 00 97 18 52 38 00 00 00 00 00 00 00 00</data>
+        </send>
+    </packet>0
+    <!--收到一包电压设置-标准电数据，回复一包确认数据，一包结果数据 --> 
+        <!--延迟50ms发送，只发送一次-->
+</COM>

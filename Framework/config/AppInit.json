@@ -1,0 +1,5 @@
+{
+    "_Comment_UDPUnicastFormNum": "(Number of UDP unicast communication forms)",
+    "UDPUnicastFormNum": 2,	
+	"_Comment_": "(Note: The last item is not followed by a comma.)"
+}

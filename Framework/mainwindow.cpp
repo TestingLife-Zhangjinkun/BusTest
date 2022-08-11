@@ -138,8 +138,7 @@ void MainWindow::actionTriggered(QAction *action)
 // Parse plugin configuration file
 void MainWindow::InitGlobalParams()
 {
-    QString fileName = tr("%1/config/AppInit.json")
-            .arg(QCoreApplication::applicationDirPath());
+    QString fileName = tr("%1/config/AppInit.json").arg(QDir::currentPath());
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly))
     {
@@ -157,10 +156,10 @@ void MainWindow::InitGlobalParams()
         if(jsonDocument.isObject())
         {
             QJsonObject jsonObject = jsonDocument.object();
-            if(jsonObject.contains("UDPUnicastTabNum") && jsonObject.value("UDPUnicastTabNum").isDouble())
+            if(jsonObject.contains("UDPUnicastFormNum") && jsonObject.value("UDPUnicastFormNum").isDouble())
             {
-                udpUnicastTabNum = jsonObject.value("UDPUnicastTabNum").toInt(1);
-//                qDebug().noquote() << "udpUnicastTabNum = " << udpUnicastTabNum;
+                udpUnicastFormNum = jsonObject.value("UDPUnicastFormNum").toInt(1);
+//                qDebug().noquote() << "udpUnicastFormNum = " << udpUnicastFormNum;
             }
         }
     }
@@ -197,7 +196,7 @@ quint8 MainWindow::LoadPlugins()
 //                    testInterface->SetTabNum(uartTabNum);
                 }
                 else if(testInterface->PluginName().toLower() == "udp")
-                    testInterface->SetTabNum(udpUnicastTabNum);
+                    testInterface->SetTabNum(udpUnicastFormNum);
                 ++count;
                 tiList.append(testInterface);
                 // Generate ToolBar after loading the plugin
