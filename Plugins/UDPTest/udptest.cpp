@@ -1,4 +1,5 @@
 #include "udptest.h"
+#include <QTabBar>
 
 UDPTest::UDPTest(QWidget *parent)
     :QWidget(parent)
@@ -45,18 +46,18 @@ void UDPTest::InitUDPWidget()
             unicastFormNum = 4;
         for (auto i = 1; i <= unicastFormNum; i++)
         {
-            ui->tabWidget->addTab(new UnicastForm(), QIcon("../Plugins/UDPTest/res/png/unicast.jpg")
+            ui->tabWidget->addTab(new UnicastForm(), QIcon("res/png/UDPPlugin/unicast.jpg")
                               , "Unicast " + QString::number(i));
         }
     }
     else
-        ui->tabWidget->addTab(new UnicastForm(), QIcon("../Plugins/UDPTest/res/png/unicast.jpg"), "Unicast");
+        ui->tabWidget->addTab(new UnicastForm(), QIcon("res/png/UDPPlugin/unicast.jpg"), "Unicast");
 //    ui->tabWidget->addTab(new MulticastForm(), QIcon(QPixmap("../Plugins/UDPTest/res/png/multicast.jpeg")), "组播和广播通信");
 //    ui->tabWidget->addTab(new FileSendForm(), QIcon(QPixmap("../Plugins/UDPTest/res/png/DataSend.jpg")), "文件发送");
-//    ui->tabWidget->addTab(new DataCheckForm(), QIcon(QPixmap("../Plugins/UDPTest/res/png/DataSend.jpg")), "数据校验");
+    ui->tabWidget->addTab(new DataCheckForm(), QIcon(QPixmap("res/png/UDPPlugin/DataSend.jpg")), "Data Check");
 
-//    ui->tabWidget->tabBar()->setDocumentMode(true);
-//    ui->tabWidget->tabBar()->setExpanding(true);
+    ui->tabWidget->tabBar()->setDocumentMode(true);
+    ui->tabWidget->tabBar()->setExpanding(true);
 
     // Displays the unicast communication form by default
     ui->tabWidget->setCurrentIndex(0);

@@ -6,6 +6,7 @@
 #include <BusTestInterface.h>
 #include "ui_udpform.h"
 #include "unicastform.h"
+#include "datacheckform.h"
 
 class UDPTEST_EXPORT UDPTest
         :public QWidget
@@ -36,7 +37,8 @@ private:
     quint16 unicastFormNum = 1;
     // Unicast Communication Form
     UnicastForm *unicastForm = nullptr;
-
+    // Data check form
+    DataCheckForm *dataCheckForm = nullptr;
 
 };
 

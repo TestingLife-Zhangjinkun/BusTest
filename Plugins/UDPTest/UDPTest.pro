@@ -15,12 +15,16 @@ INCLUDEPATH    += ../../framework
 DESTDIR     = ../Plugin
 
 SOURCES += \
+    datacheckform.cpp \
+    typeconvert.cpp \
     udpform.cpp \
     udptest.cpp \
     unicastform.cpp
 
 HEADERS += \
     UDPTest_global.h \
+    datacheckform.h \
+    typeconvert.h \
     udpform.h \
     udptest.h \
     unicastform.h
@@ -32,5 +36,6 @@ unix {
 !isEmpty(target.path): INSTALLS += target
 
 FORMS += \
+    datacheckform.ui \
     udpform.ui \
     unicastform.ui
