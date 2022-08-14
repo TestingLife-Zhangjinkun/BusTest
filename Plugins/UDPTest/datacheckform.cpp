@@ -7,6 +7,9 @@ DataCheckForm::DataCheckForm(QWidget *parent) :
     ui(new Ui::DataCheckForm)
 {
     ui->setupUi(this);
+
+    ui->lineEdit_Float1_MemVal->setFocusPolicy(Qt::NoFocus);
+    ui->checkBox_LittleEndian->setChecked(true);
 }
 
 DataCheckForm::~DataCheckForm()
@@ -25,12 +28,12 @@ void DataCheckForm::on_pushButton_Convert1_clicked()
 {
     QString strFloat = ui->lineEdit_Float1->text();
     float f = strFloat.toFloat();
-    QByteArray ba;
-    const quint8* ch = (quint8*)(&f);
-    ba.resize(4);
-    for(auto i=0; i<4; ++i)
-        ba[i] = *((quint8*)(ch+i));
-    QString str = tcInstance.ByteArrayToHexString(ba);
+    const char* ch = (char*)(&f);
+    QByteArray ba = QByteArray(ch, 4);
+    // Big end mode, reversed
+    if(!ui->checkBox_LittleEndian->isChecked())
+        std::reverse(ba.begin(), ba.end());
+    QString str = ba.toHex(' ').toUpper();
     ui->lineEdit_Hex1->setText(str);
 }
 
@@ -43,6 +46,7 @@ void DataCheckForm::on_pushButton_Convert2_clicked()
     for(auto i=0; i<4; ++i)
         *(ch+i) = ba[i];
 
+    qInfo().noquote() << f;
     QString strFloat = QString("%1").arg(f);
     ui->lineEdit_Float2->setText(strFloat);
 
@@ -57,4 +61,13 @@ void DataCheckForm::on_pushButton_Convert2_clicked()
 
 
 
+
+// 显示在内存值表示浮点数的实际值
+void DataCheckForm::on_lineEdit_Float1_editingFinished()
+{
+    QString strFloat = ui->lineEdit_Float1->text();
+    float f = strFloat.toFloat();
+    qInfo().noquote() << QString::number(f, 'f', 6);
+    ui->lineEdit_Float1_MemVal->setText(QString::number(f, 'f', 6));
+}
 

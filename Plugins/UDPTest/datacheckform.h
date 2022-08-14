@@ -21,6 +21,8 @@ private slots:
 
     void on_pushButton_Convert2_clicked();
 
+    void on_lineEdit_Float1_editingFinished();
+
 private:
     Ui::DataCheckForm *ui;
     // Variables for TypeConvert
