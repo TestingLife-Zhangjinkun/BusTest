@@ -23,6 +23,25 @@ private slots:
 
     void on_lineEdit_Float1_editingFinished();
 
+    void on_pushButton_ChangeMemMode1_clicked();
+
+    void on_checkBox_Separator1_stateChanged(int arg1);
+
+    void on_checkBox_LittleEndian2_stateChanged(int arg1);
+
+
+    void on_lineEdit_Hex2_textChanged(const QString &arg1);
+
+    void on_pushButton_Convert3_clicked();
+
+    void on_lineEdit_Double1_editingFinished();
+
+    void on_pushButton_Convert4_clicked();
+
+    void on_pushButton_ChangeMemMode3_clicked();
+
+    void on_checkBox_LittleEndian4_stateChanged(int arg1);
+
 private:
     Ui::DataCheckForm *ui;
     // Variables for TypeConvert
