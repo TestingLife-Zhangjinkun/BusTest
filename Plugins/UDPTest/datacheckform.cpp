@@ -31,10 +31,14 @@ DataCheckForm::DataCheckForm(QWidget *parent) :
     ui->lineEdit_Float2->setReadOnly(true);
     ui->lineEdit_Float2_MemVal->setFocusPolicy(Qt::NoFocus);
 
+    ui->lineEdit_Double1_MemVal->setFocusPolicy(Qt::NoFocus);
     ui->checkBox_LittleEndian3->setChecked(true);
     ui->checkBox_LittleEndian3->setDisabled(true);
     ui->checkBox_Separator3->setChecked(true);
     ui->lineEdit_Hex3->setReadOnly(true);
+
+    QRegExpValidator* doubleRegExp = new QRegExpValidator(QRegExp("^(-?\\d+)(\\.\\d{0,13})?$"));
+    ui->lineEdit_Double1->setValidator(doubleRegExp);
 
     ui->checkBox_LittleEndian4->setChecked(true);
     QStringList list1 = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
@@ -43,6 +47,16 @@ DataCheckForm::DataCheckForm(QWidget *parent) :
     ui->comboBox_Double2_ReservedBits->setCurrentIndex(2);
     ui->lineEdit_Double2->setReadOnly(true);
     ui->lineEdit_Double2_MemVal->setFocusPolicy(Qt::NoFocus);
+
+    QRegExpValidator* hexRegExp1 = new QRegExpValidator(QRegExp("([a-fA-F0-9]{2}\\s?){7}[a-fA-F0-9]{2}"));
+    ui->lineEdit_Hex4->setValidator(hexRegExp1);
+
+    ui->checkBox_LittleEndian5->setChecked(true);
+    ui->checkBox_LittleEndian5->setDisabled(true);
+    ui->checkBox_Separator5->setChecked(true);
+    ui->checkBox_LittleEndian2->setChecked(true);
+    QStringList list2 = {"Int8", "UInt8", "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64"};
+    ui->comboBox_IntType1->addItems(list2);
 
 }
 
@@ -176,7 +190,7 @@ void DataCheckForm::on_lineEdit_Double1_editingFinished()
 {
     QString strDouble = ui->lineEdit_Double1->text();
     double d = strDouble.toDouble();
-    qInfo().noquote() << QString::number(d, 'f', 13);
+//    qInfo().noquote() << QString::number(d, 'f', 13);
     ui->lineEdit_Double1_MemVal->setText(QString::number(d, 'f', 13));
 }
 
@@ -223,3 +237,46 @@ void DataCheckForm::on_checkBox_LittleEndian4_stateChanged(int arg1)
     else
         ui->checkBox_LittleEndian4->setText("大端模式");
 }
+
+void DataCheckForm::on_lineEdit_Hex4_textChanged(const QString &arg1)
+{
+    ui->lineEdit_Hex4->setText(tcInstance.StringNoNullToNull(arg1));
+}
+
+// 整数与十六进制的转换
+void DataCheckForm::on_pushButton_Convert5_clicked()
+{
+    if(ui->lineEdit_Int1->text().trimmed().isEmpty())
+    {
+        QMessageBox::information(this, "信息提示", "请输入整数！");
+        return;
+    }
+
+    QString strInt = ui->lineEdit_Int1->text();
+    QVariant i;
+    bool ok;
+    int base = 10;
+    switch (ui->comboBox_IntType1->currentIndex())
+    {
+    case 0:
+        i = strInt;
+        break;
+    case 1:
+        i = strInt.toUInt(&ok, base);
+        break;
+
+    }
+    const char* ch = (char*)(&i);
+    QByteArray ba = QByteArray(ch, 4);
+    // Big end mode, reversed
+    if(!ui->checkBox_LittleEndian5->isChecked())
+        std::reverse(ba.begin(), ba.end());
+    QString str = "";
+    if(ui->checkBox_Separator5->isChecked())
+        str = ba.toHex(' ').toUpper();
+    else
+        str = ba.toHex().toUpper();
+    ui->lineEdit_Hex5->setText(str);
+
+}
+

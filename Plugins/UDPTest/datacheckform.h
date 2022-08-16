@@ -42,6 +42,10 @@ private slots:
 
     void on_checkBox_LittleEndian4_stateChanged(int arg1);
 
+    void on_lineEdit_Hex4_textChanged(const QString &arg1);
+
+    void on_pushButton_Convert5_clicked();
+
 private:
     Ui::DataCheckForm *ui;
     // Variables for TypeConvert
