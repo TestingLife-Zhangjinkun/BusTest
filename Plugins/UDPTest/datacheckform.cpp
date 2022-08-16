@@ -254,22 +254,69 @@ void DataCheckForm::on_pushButton_Convert5_clicked()
 
     QString strInt = ui->lineEdit_Int1->text();
     QVariant i;
+    const char* ch = (char*)(&i);
     bool ok;
     int base = 10;
+    QByteArray ba;
     switch (ui->comboBox_IntType1->currentIndex())
     {
     case 0:
-        i = strInt;
+        i = strInt.toInt(&ok, base);
+        if(i<-128 || i > 127)
+        {
+            QMessageBox::information(this, "信息提示", "Int8类型整数范围：-128~127");
+            return;
+        }
+        ba = QByteArray(ch, 1);
         break;
     case 1:
-        i = strInt.toUInt(&ok, base);
+        i = strInt.toInt(&ok, base);
+        if(i<0 || i > 255)
+        {
+            QMessageBox::information(this, "信息提示", "UInt8类型整数范围：0~255");
+            return;
+        }
+        ba = QByteArray(ch, 1);
         break;
-
+    case 2:
+        i = strInt.toShort(&ok, base);
+        if(!ok)
+        {
+            QMessageBox::information(this, "信息提示", "Int16类型整数范围：-32768~32767");
+            return;
+        }
+        ba = QByteArray(ch, 2);
+        break;
+    case 3:
+        i = strInt.toUShort(&ok, base);
+        if(!ok)
+        {
+            QMessageBox::information(this, "信息提示", "Int16类型整数范围：0~65535");
+            return;
+        }
+        ba = QByteArray(ch, 2);
+        break;
+    case 4:
+        i = strInt.toInt(&ok, base);
+        if(!ok)
+        {
+            QMessageBox::information(this, "信息提示", "Int32类型整数范围：-2147483648~2147483647");
+            return;
+        }
+        ba = QByteArray(ch, 4);
+        break;
+    case 5:
+        i = strInt.toUInt(&ok, base);
+        if(!ok)
+        {
+            QMessageBox::information(this, "信息提示", "UInt32类型整数范围：0~4294967295");
+            return;
+        }
+        ba = QByteArray(ch, 4);
+        break;
     }
-    const char* ch = (char*)(&i);
-    QByteArray ba = QByteArray(ch, 4);
     // Big end mode, reversed
-    if(!ui->checkBox_LittleEndian5->isChecked())
+    if((ui->comboBox_IntType1->currentIndex() > 1) && (!ui->checkBox_LittleEndian5->isChecked()))
         std::reverse(ba.begin(), ba.end());
     QString str = "";
     if(ui->checkBox_Separator5->isChecked())
@@ -280,3 +327,16 @@ void DataCheckForm::on_pushButton_Convert5_clicked()
 
 }
 
+void DataCheckForm::on_pushButton_ChangeMemMode5_clicked()
+{
+    if(ui->checkBox_LittleEndian5->isChecked())
+    { // little endian mode
+        ui->checkBox_LittleEndian5->setChecked(false);
+        ui->checkBox_LittleEndian5->setText("大端模式");
+    }
+    else
+    {
+        ui->checkBox_LittleEndian5->setChecked(true);
+        ui->checkBox_LittleEndian5->setText("小端模式");
+    }
+}

@@ -46,6 +46,8 @@ private slots:
 
     void on_pushButton_Convert5_clicked();
 
+    void on_pushButton_ChangeMemMode5_clicked();
+
 private:
     Ui::DataCheckForm *ui;
     // Variables for TypeConvert
