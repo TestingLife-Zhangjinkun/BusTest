@@ -568,7 +568,7 @@
    <widget class="QLabel" name="label_9">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>130</x>
       <y>50</y>
       <width>60</width>
       <height>23</height>
@@ -581,19 +581,19 @@
    <widget class="QLineEdit" name="lineEdit_Hex5">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>190</x>
       <y>50</y>
-      <width>80</width>
+      <width>100</width>
       <height>23</height>
      </rect>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_Hex2_2">
+   <widget class="QLineEdit" name="lineEdit_Hex6">
     <property name="geometry">
      <rect>
       <x>460</x>
       <y>20</y>
-      <width>80</width>
+      <width>120</width>
       <height>23</height>
      </rect>
     </property>
@@ -611,10 +611,10 @@
      <string>十六进制：</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_Float2_2">
+   <widget class="QLineEdit" name="lineEdit_Int2">
     <property name="geometry">
      <rect>
-      <x>460</x>
+      <x>590</x>
       <y>50</y>
       <width>80</width>
       <height>23</height>
@@ -624,14 +624,14 @@
    <widget class="QLabel" name="label_11">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>550</x>
       <y>50</y>
-      <width>60</width>
+      <width>40</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>浮 点 数：</string>
+     <string>整数：</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_Convert2_2">
@@ -686,33 +686,10 @@
      <string>空格分隔</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_Float2_MemVal_2">
+   <widget class="QCheckBox" name="checkBox_LittleEndian6">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>50</y>
-      <width>80</width>
-      <height>23</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_13">
-    <property name="geometry">
-     <rect>
-      <x>550</x>
-      <y>50</y>
-      <width>50</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>内存值：</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="checkBox_LittleEndian2_2">
-    <property name="geometry">
-     <rect>
-      <x>550</x>
+      <x>590</x>
       <y>20</y>
       <width>70</width>
       <height>23</height>
@@ -725,21 +702,21 @@
    <widget class="QLabel" name="label_14">
     <property name="geometry">
      <rect>
-      <x>630</x>
-      <y>20</y>
-      <width>60</width>
+      <x>400</x>
+      <y>50</y>
+      <width>40</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>有效位数：</string>
+     <string>类型：</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox_Float2_ReservedBits_2">
+   <widget class="QComboBox" name="comboBox_IntType2">
     <property name="geometry">
      <rect>
-      <x>690</x>
-      <y>20</y>
+      <x>440</x>
+      <y>50</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -763,7 +740,7 @@
      <rect>
       <x>50</x>
       <y>50</y>
-      <width>80</width>
+      <width>60</width>
       <height>23</height>
      </rect>
     </property>

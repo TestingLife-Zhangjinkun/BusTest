@@ -57,6 +57,12 @@ DataCheckForm::DataCheckForm(QWidget *parent) :
     ui->checkBox_LittleEndian2->setChecked(true);
     QStringList list2 = {"Int8", "UInt8", "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64"};
     ui->comboBox_IntType1->addItems(list2);
+    ui->comboBox_IntType1->setCurrentIndex(4);
+    ui->lineEdit_Hex5->setReadOnly(true);
+
+    QRegExpValidator* intRegExp = new QRegExpValidator(QRegExp("^-?\\d+$"));
+    ui->lineEdit_Int1->setValidator(intRegExp);
+
 
 }
 
@@ -313,6 +319,26 @@ void DataCheckForm::on_pushButton_Convert5_clicked()
             return;
         }
         ba = QByteArray(ch, 4);
+        break;
+    case 6:
+        i = strInt.toLongLong(&ok, base);
+        if(!ok)
+        {
+            QMessageBox::information(this, "信息提示", "输入的Int64类型整数超出有效范围！");
+            return;
+        }
+        ba = QByteArray(ch, 8);
+        break;
+    case 7:
+        i = strInt.toULongLong(&ok, base);
+        if(!ok)
+        {
+            QMessageBox::information(this, "信息提示", "输入的UInt64类型整数超出有效范围！");
+            return;
+        }
+        ba = QByteArray(ch, 8);
+        break;
+    default:
         break;
     }
     // Big end mode, reversed
