@@ -48,6 +48,10 @@ private slots:
 
     void on_pushButton_ChangeMemMode5_clicked();
 
+    void on_pushButton_Convert6_clicked();
+
+    void on_lineEdit_Hex6_textChanged(const QString &arg1);
+
 private:
     Ui::DataCheckForm *ui;
     // Variables for TypeConvert

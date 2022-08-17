@@ -63,7 +63,11 @@ DataCheckForm::DataCheckForm(QWidget *parent) :
     QRegExpValidator* intRegExp = new QRegExpValidator(QRegExp("^-?\\d+$"));
     ui->lineEdit_Int1->setValidator(intRegExp);
 
+    ui->comboBox_IntType2->addItems(list2);
+    ui->comboBox_IntType2->setCurrentIndex(4);
+    ui->checkBox_LittleEndian6->setChecked(true);
 
+    ui->lineEdit_Hex6->setValidator(hexRegExp1);
 }
 
 DataCheckForm::~DataCheckForm()
@@ -365,4 +369,106 @@ void DataCheckForm::on_pushButton_ChangeMemMode5_clicked()
         ui->checkBox_LittleEndian5->setChecked(true);
         ui->checkBox_LittleEndian5->setText("小端模式");
     }
+}
+
+// 十六进制字符串转换为整数
+void DataCheckForm::on_pushButton_Convert6_clicked()
+{
+    QString strHex = ui->lineEdit_Hex6->text().trimmed();
+    QByteArray ba = QByteArray::fromHex(strHex.toLatin1());
+    quint16 byteLen = 0;
+    QVariant i;
+    switch (ui->comboBox_IntType2->currentIndex())
+    {
+    case 0:
+        i = (qint8)0;
+        byteLen = 1;
+        break;
+    case 1:
+        i = (quint8)0;
+        byteLen = 1;
+        break;
+    case 2:
+        i = (qint16)0;
+        byteLen = 2;
+        break;
+    case 3:
+        i = (quint16)0;
+        byteLen = 2;
+        break;
+    case 4:
+        i = (qint32)0;
+        byteLen = 4;
+        break;
+    case 5:
+        i = (quint32)0;
+        byteLen = 4;
+        break;
+    case 6:
+        i = (qint64)0;
+        byteLen = 8;
+        break;
+    case 7:
+        i = (quint64)0;
+        byteLen = 8;
+        break;
+    default:
+        break;
+    }
+    if(ba.size() != byteLen)
+    {
+        QMessageBox::information(this, "信息提示", "输入的十六进制字节的长度与类型不匹配！");
+        return;
+    }
+    char* ch = (char*)(&i);
+    if(!ui->checkBox_LittleEndian6->isChecked())
+        std::reverse(ba.begin(), ba.end());
+    for(auto index=0; index<byteLen; ++index)
+        *(ch+index) = ba[index];
+
+    QString strInt = "";
+    bool ok;
+    switch (ui->comboBox_IntType2->currentIndex())
+    {
+    case 0:
+        // handle negative numbers
+        if(i.toInt(&ok) & 0x80)
+            strInt = QString::number(i.toInt(&ok) - 0xFF - 1);
+        else
+            strInt = QString::number(i.toInt(&ok));
+        break;
+    case 1:
+        strInt = QString::number(i.toUInt());
+        break;
+    case 2:
+        // handle negative numbers
+        if(i.toInt(&ok) & 0x8000)
+            strInt = QString::number(i.toInt(&ok) - 0xFFFF - 1);
+        else
+            strInt = QString::number(i.toInt(&ok));
+        break;
+    case 3:
+        strInt = QString::number(i.toUInt());
+        break;
+    case 4:
+        strInt = QString::number(i.toInt());
+        break;
+    case 5:
+        strInt = QString::number(i.toUInt());
+        break;
+    case 6:
+        strInt = QString::number(i.toLongLong());
+        break;
+    case 7:
+        strInt = QString::number(i.toULongLong());
+        break;
+    default:
+        break;
+    }
+    ui->lineEdit_Int2->setText(strInt);
+}
+
+void DataCheckForm::on_lineEdit_Hex6_textChanged(const QString &arg1)
+{
+    ui->lineEdit_Hex6->setText(tcInstance.StringNoNullToNull(arg1));
 }

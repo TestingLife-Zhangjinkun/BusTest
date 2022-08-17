@@ -547,7 +547,7 @@
      <rect>
       <x>50</x>
       <y>20</y>
-      <width>80</width>
+      <width>100</width>
       <height>23</height>
      </rect>
     </property>
@@ -555,7 +555,7 @@
    <widget class="QPushButton" name="pushButton_Convert5">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>340</x>
       <y>50</y>
       <width>75</width>
       <height>23</height>
@@ -568,7 +568,7 @@
    <widget class="QLabel" name="label_9">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>120</x>
       <y>50</y>
       <width>60</width>
       <height>23</height>
@@ -581,9 +581,9 @@
    <widget class="QLineEdit" name="lineEdit_Hex5">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>180</x>
       <y>50</y>
-      <width>100</width>
+      <width>150</width>
       <height>23</height>
      </rect>
     </property>
@@ -591,9 +591,9 @@
    <widget class="QLineEdit" name="lineEdit_Hex6">
     <property name="geometry">
      <rect>
-      <x>460</x>
+      <x>500</x>
       <y>20</y>
-      <width>120</width>
+      <width>150</width>
       <height>23</height>
      </rect>
     </property>
@@ -601,7 +601,7 @@
    <widget class="QLabel" name="label_10">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>440</x>
       <y>20</y>
       <width>60</width>
       <height>23</height>
@@ -616,7 +616,7 @@
      <rect>
       <x>590</x>
       <y>50</y>
-      <width>80</width>
+      <width>90</width>
       <height>23</height>
      </rect>
     </property>
@@ -634,7 +634,7 @@
      <string>整数：</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_Convert2_2">
+   <widget class="QPushButton" name="pushButton_Convert6">
     <property name="geometry">
      <rect>
       <x>690</x>
@@ -650,7 +650,7 @@
    <widget class="QCheckBox" name="checkBox_LittleEndian5">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>170</x>
       <y>20</y>
       <width>70</width>
       <height>23</height>
@@ -663,7 +663,7 @@
    <widget class="QPushButton" name="pushButton_ChangeMemMode5">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>240</x>
       <y>20</y>
       <width>80</width>
       <height>23</height>
@@ -676,7 +676,7 @@
    <widget class="QCheckBox" name="checkBox_Separator5">
     <property name="geometry">
      <rect>
-      <x>305</x>
+      <x>340</x>
       <y>20</y>
       <width>70</width>
       <height>23</height>
@@ -689,7 +689,7 @@
    <widget class="QCheckBox" name="checkBox_LittleEndian6">
     <property name="geometry">
      <rect>
-      <x>590</x>
+      <x>690</x>
       <y>20</y>
       <width>70</width>
       <height>23</height>
@@ -702,7 +702,7 @@
    <widget class="QLabel" name="label_14">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>440</x>
       <y>50</y>
       <width>40</width>
       <height>23</height>
@@ -715,9 +715,9 @@
    <widget class="QComboBox" name="comboBox_IntType2">
     <property name="geometry">
      <rect>
-      <x>440</x>
+      <x>480</x>
       <y>50</y>
-      <width>75</width>
+      <width>60</width>
       <height>23</height>
      </rect>
     </property>
