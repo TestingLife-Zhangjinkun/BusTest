@@ -2,6 +2,7 @@
 #include "ui_datacheckform.h"
 #include <QDebug>
 #include <QMessageBox>
+#include <QMetaEnum>
 
 DataCheckForm::DataCheckForm(QWidget *parent) :
     QWidget(parent),
@@ -68,6 +69,14 @@ DataCheckForm::DataCheckForm(QWidget *parent) :
     ui->checkBox_LittleEndian6->setChecked(true);
 
     ui->lineEdit_Hex6->setValidator(hexRegExp1);
+
+    //******************************//
+    QStringList byteLengthList = {"1子节", "2子节", "4子节"};
+    ui->comboBox_ChecksumLength->blockSignals(true);
+    ui->comboBox_ChecksumLength->addItems(byteLengthList);
+    ui->comboBox_ChecksumLength->blockSignals(false);
+    ui->comboBox_ChecksumLength->setCurrentIndex(1);
+
 }
 
 DataCheckForm::~DataCheckForm()
@@ -471,4 +480,32 @@ void DataCheckForm::on_pushButton_Convert6_clicked()
 void DataCheckForm::on_lineEdit_Hex6_textChanged(const QString &arg1)
 {
     ui->lineEdit_Hex6->setText(tcInstance.StringNoNullToNull(arg1));
+}
+
+// 初始化校验算法下拉列表框
+void DataCheckForm::on_comboBox_ChecksumLength_currentIndexChanged(int index)
+{
+    ui->comboBox_CheckAlgorithm->clear();
+    QMetaEnum me;
+    switch (index)
+    {
+    case 0:
+        // 获得枚举类型的元数据对象
+        me = QMetaEnum::fromType<DataCheckForm::CRC8_Mode>();
+        for(auto i = 0; i < me.keyCount(); ++i)
+            ui->comboBox_CheckAlgorithm->addItem(me.key(i));
+        break;
+    case 1:
+        me = QMetaEnum::fromType<DataCheckForm::CRC16_Mode>();
+        for(auto i = 0; i < me.keyCount(); ++i)
+            ui->comboBox_CheckAlgorithm->addItem(me.key(i));
+        break;
+    case 2:
+        me = QMetaEnum::fromType<DataCheckForm::CRC32_Mode>();
+        for(auto i = 0; i < me.keyCount(); ++i)
+            ui->comboBox_CheckAlgorithm->addItem(me.key(i));
+        break;
+    default:
+        break;
+    }
 }

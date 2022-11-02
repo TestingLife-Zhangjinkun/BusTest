@@ -13,6 +13,34 @@ class DataCheckForm : public QWidget
     Q_OBJECT
 
 public:
+
+    enum CRC8_Mode
+    {
+        CRC8_ITU = 0,
+        CRC8_ROHC,
+        CRC8_MAXIM,
+    };
+    enum CRC16_Mode
+    {
+        CRC16_CCITT_True = 0,
+        CRC16_CCITT_FALSE,
+        CRC16_XMODEM,
+        CRC16_X25,
+        CRC16_MODBUS,
+        CRC16_IBM,
+        CRC16_MAXIM,
+        Crc16_USB,
+        CRC16_DNP,
+    };
+    enum CRC32_Mode
+    {
+        CRC32_WinRAR = 0,
+        CRC32_MPEG
+    };
+    Q_ENUM(CRC8_Mode)
+    Q_ENUM(CRC16_Mode)
+    Q_ENUM(CRC32_Mode)
+
     explicit DataCheckForm(QWidget *parent = nullptr);
     ~DataCheckForm();
 
@@ -51,6 +79,8 @@ private slots:
     void on_pushButton_Convert6_clicked();
 
     void on_lineEdit_Hex6_textChanged(const QString &arg1);
+
+    void on_comboBox_ChecksumLength_currentIndexChanged(int index);
 
 private:
     Ui::DataCheckForm *ui;

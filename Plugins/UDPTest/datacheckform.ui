@@ -746,6 +746,75 @@
     </property>
    </widget>
   </widget>
+  <widget class="QGroupBox" name="groupBox_CRCChecksum">
+   <property name="geometry">
+    <rect>
+     <x>5</x>
+     <y>340</y>
+     <width>775</width>
+     <height>170</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>CRC校验</string>
+   </property>
+   <widget class="QTextEdit" name="textEdit_ByteString">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>500</width>
+      <height>140</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_ChecksumLength">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>20</y>
+      <width>100</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_22">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>20</y>
+      <width>70</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>校验码长度：</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_23">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>50</y>
+      <width>70</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>校验算法：</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_CheckAlgorithm">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>50</y>
+      <width>100</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <resources/>
  <connections/>
