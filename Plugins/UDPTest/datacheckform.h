@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "typeconvert.h"
+#include <QButtonGroup>
 
 namespace Ui {
 class DataCheckForm;
@@ -14,11 +15,22 @@ class DataCheckForm : public QWidget
 
 public:
 
+    /***** Singleton pattern class definition *******/
+    static DataCheckForm& getDCFInstance()
+    {
+        static DataCheckForm instance;
+        return instance;
+    }
+
+    explicit DataCheckForm(QWidget *parent = nullptr);
+    ~DataCheckForm();
+
     enum CRC8_Mode
     {
-        CRC8_ITU = 0,
+        Crc8 = 0,
+        CRC8_ITU,
         CRC8_ROHC,
-        CRC8_MAXIM,
+        Crc8_MAXIM,
     };
     enum CRC16_Mode
     {
@@ -27,7 +39,7 @@ public:
         CRC16_XMODEM,
         CRC16_X25,
         CRC16_MODBUS,
-        CRC16_IBM,
+        Crc16_IBM,
         CRC16_MAXIM,
         Crc16_USB,
         CRC16_DNP,
@@ -35,14 +47,20 @@ public:
     enum CRC32_Mode
     {
         CRC32_WinRAR = 0,
-        CRC32_MPEG
+        Crc32_MPEG
     };
     Q_ENUM(CRC8_Mode)
     Q_ENUM(CRC16_Mode)
     Q_ENUM(CRC32_Mode)
 
-    explicit DataCheckForm(QWidget *parent = nullptr);
-    ~DataCheckForm();
+    // Qt反射：就是运行时把字符串映射为类，函数声明时必须使用Q_INVOKABLE
+    Q_INVOKABLE quint8 CRC8(char *data, quint16 dataLen);
+    Q_INVOKABLE quint8 CRC8_MAXIM(char *data, quint16 dataLen);
+
+    Q_INVOKABLE quint16 CRC16_USB(char* data, quint16 dataLen);
+    Q_INVOKABLE quint16 CRC16_IBM(char* data, quint16 dataLen);
+
+    Q_INVOKABLE quint32 CRC32_MPEG(char *data, quint16 dataLen);    // MPEG使用该校验算法
 
 private slots:
     void on_pushButton_Convert1_clicked();
@@ -82,10 +100,25 @@ private slots:
 
     void on_comboBox_ChecksumLength_currentIndexChanged(int index);
 
+    void on_pushButton_Generate_Checkcode_clicked();
+
+    // 选择CRC校验码字节序的多个QRadioButton控件的槽函数
+    void onRadioClickSelecByteOrder();
+
+    void on_checkBox_FormatData_stateChanged(int arg1);
+
+    void on_textEdit_ByteString_textChanged();
+
 private:
+    void InvertUint16(quint16 *destUShort, quint16 *srcUShort);
+    void InvertUint8(quint8 *destUch, quint8 *srcUch);
+
     Ui::DataCheckForm *ui;
     // Variables for TypeConvert
     TypeConvert tcInstance = TypeConvert::getTCInstance();
+    // false：小端存储；true：大端存储。缺省为小端存储
+    bool  crcByteOrder = false;
+    QButtonGroup *sendModeGroup = nullptr;
 
 };
 

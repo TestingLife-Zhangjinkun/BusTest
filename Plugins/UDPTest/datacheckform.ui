@@ -814,6 +814,91 @@
      </rect>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_Generate_Checkcode">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>80</y>
+      <width>80</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>产生校验码</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Checkcode">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>80</y>
+      <width>100</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_13">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>120</y>
+      <width>50</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>字节序：</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButton_SmallStorage">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>120</y>
+      <width>70</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>小端存储</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButton_BigStorage">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>120</y>
+      <width>70</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>大端存储</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_FormatData">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>140</y>
+      <width>100</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>格式化数据</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Checkcode_Dec">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>80</y>
+      <width>60</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

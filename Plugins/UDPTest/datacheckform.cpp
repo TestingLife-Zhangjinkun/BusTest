@@ -3,6 +3,88 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QMetaEnum>
+#include <QTextBlock>
+
+quint16 DataCheckForm::CRC16_USB(char *data, quint16 dataLen)
+{
+    quint16 initValue = 0xFFFF;
+    quint16 poly = 0x8005;
+
+    InvertUint16(&poly, &poly);
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(auto i = 0; i < 8; i++)
+        {
+            if(initValue & 0x01)
+            {
+                initValue = (initValue >> 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue >> 1;
+            }
+        }
+    }
+    return (initValue ^ 0xFFFF);
+
+}
+
+quint16 DataCheckForm::CRC16_IBM(char *data, quint16 dataLen)
+{
+    quint16 initValue = 0x0000;
+    quint16 poly = 0x8005;
+
+    //    InvertUint16(&poly, &poly);
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(int i = 0;i < 8;i++)
+        {
+            if(initValue & 0x01)
+                initValue = (initValue >> 1) ^ poly;
+            else
+                initValue = initValue >> 1;
+        }
+    }
+    return initValue;
+}
+
+/****************************Info**********************************************
+* Name:    CRC-32/MPEG-2  x32+x26+x23+x22+x16+x12+x11+x10+x8+x7+x5+x4+x2+x+1
+* Width:	32
+* Poly:    0x4C11DB7
+* Init:    0xFFFFFFF
+* Refin:   False
+* Refout:  False
+* Xorout:  0x0000000
+* Note:
+*****************************************************************************/
+quint32 DataCheckForm::CRC32_MPEG(char *data, quint16 dataLen)
+{
+    quint32 initValue = 0xFFFFFFFF;
+    quint32 poly = 0x04C11DB7;
+    quint8 uCh = 0;
+
+    while (dataLen--)
+    {
+        uCh = *(data++);
+        initValue ^= (uCh << 24);
+        for(auto i = 0; i < 8; i++)
+        {
+            if(initValue & 0x80000000)
+            {
+                initValue = (initValue << 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue << 1;
+            }
+        }
+    }
+
+    return initValue;
+}
 
 DataCheckForm::DataCheckForm(QWidget *parent) :
     QWidget(parent),
@@ -77,11 +159,70 @@ DataCheckForm::DataCheckForm(QWidget *parent) :
     ui->comboBox_ChecksumLength->blockSignals(false);
     ui->comboBox_ChecksumLength->setCurrentIndex(1);
 
+    //zjk 20221102
+    // 初始化字节序单选按钮分组
+    sendModeGroup = new QButtonGroup(this);
+    sendModeGroup->addButton(ui->radioButton_SmallStorage, 0);
+    sendModeGroup->addButton(ui->radioButton_BigStorage, 1);
+    // 初始设置小端存储
+    ui->radioButton_SmallStorage->setChecked(true);
+    // 绑定信号与槽
+    connect(ui->radioButton_SmallStorage, SIGNAL(clicked()), this, SLOT(onRadioClickSelecByteOrder()));
+    connect(ui->radioButton_BigStorage, SIGNAL(clicked()), this, SLOT(onRadioClickSelecByteOrder()));
 }
 
 DataCheckForm::~DataCheckForm()
 {
     delete ui;
+}
+
+quint8 DataCheckForm::CRC8(char *data, quint16 dataLen)
+{
+    quint8 initValue = 0x00;
+    quint8 poly = 0x07;
+
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(auto i = 0; i < 8; i++)
+        {
+            if(initValue & 0x80)
+            {
+                initValue = (initValue << 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue << 1;
+            }
+        }
+    }
+
+    return initValue;
+}
+
+quint8 DataCheckForm::CRC8_MAXIM(char *data, quint16 dataLen)
+{
+    quint8 initValue = 0x00;
+    quint8 poly = 0x31;
+
+    InvertUint8(&poly, &poly);
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(auto i = 0; i < 8; i++)
+        {
+            if(initValue & 0x01)
+            {
+                initValue = (initValue >> 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue >> 1;
+            }
+        }
+    }
+
+    return initValue;
 }
 
 /***
@@ -209,7 +350,7 @@ void DataCheckForm::on_lineEdit_Double1_editingFinished()
 {
     QString strDouble = ui->lineEdit_Double1->text();
     double d = strDouble.toDouble();
-//    qInfo().noquote() << QString::number(d, 'f', 13);
+    //    qInfo().noquote() << QString::number(d, 'f', 13);
     ui->lineEdit_Double1_MemVal->setText(QString::number(d, 'f', 13));
 }
 
@@ -507,5 +648,175 @@ void DataCheckForm::on_comboBox_ChecksumLength_currentIndexChanged(int index)
         break;
     default:
         break;
+    }
+}
+
+// 产生校验码函数  20221102
+void DataCheckForm::on_pushButton_Generate_Checkcode_clicked()
+{
+    QString hexStr = ui->textEdit_ByteString->toPlainText();
+    QByteArray ba = tcInstance.HexStringToByteArray(hexStr);
+    DataCheckForm& pCRC = DataCheckForm::getDCFInstance();
+    char* pCrcCheckSum = ba.data();    // QByteArray转char*
+    quint8 ret8 = 0;
+    quint16 ret16 = 0;
+    quint32 ret32 = 0;
+    QString methodName = ui->comboBox_CheckAlgorithm->currentText().toUpper();
+    bool callResult = false;
+    switch (ui->comboBox_ChecksumLength->currentIndex())
+    {
+    case 0: // 处理1字节校验码
+        callResult = QMetaObject::invokeMethod(&pCRC, methodName.toLatin1().data(), Qt :: AutoConnection,
+                                               Q_RETURN_ARG(quint8, ret8),
+                                               Q_ARG(char*, pCrcCheckSum), Q_ARG(quint16, ba.size()));
+        break;
+    case 1: // 处理2字节校验码
+        // Note：被调用QMetaObject::invokeMethod的参数类型必须严格一致。Q_ARG()宏不识别quint8类型，需要使用char
+        callResult = QMetaObject::invokeMethod(&pCRC, methodName.toLatin1().data(), Qt :: AutoConnection,
+                                               Q_RETURN_ARG(quint16, ret16),
+                                               Q_ARG(char*, pCrcCheckSum), Q_ARG(quint16, ba.size()));
+        break;
+    case 2: // 处理4字节校验码
+        qRegisterMetaType<quint32>("quint32");
+        callResult = QMetaObject::invokeMethod(&pCRC, methodName.toLatin1().data(), Qt :: AutoConnection,
+                                               Q_RETURN_ARG(quint32, ret32),
+                                               Q_ARG(char*, pCrcCheckSum), Q_ARG(quint16, ba.size()));
+        break;
+    default:
+        ;
+    }
+    if(!callResult)
+    {
+        ui->lineEdit_Checkcode->setText("调用校验函数失败！");
+        return;
+    }
+    // 根据字节长度返回校验码
+    QString checkcode = "";
+    switch (ui->comboBox_ChecksumLength->currentIndex())
+    {
+    case 0:
+        qDebug().noquote() << "十进制校验码：" << ret8;
+        checkcode = tcInstance.DecToHexString(ret8, 1, !crcByteOrder);
+        qDebug().noquote() << "十六进制校验码：" << checkcode;
+        ui->lineEdit_Checkcode_Dec->setText(QString::number(ret8));
+        break;
+    case 1:
+        qDebug().noquote() << "十进制校验码：" << ret16;
+        checkcode = tcInstance.DecToHexString(ret16, 2, !crcByteOrder);
+        qDebug().noquote() << "十六进制校验码：" << checkcode;
+        ui->lineEdit_Checkcode_Dec->setText(QString::number(ret16));
+        break;
+    case 2:
+        qDebug().noquote() << "十进制校验码：" << ret32;
+        checkcode = tcInstance.DecToHexString(ret32, 4, !crcByteOrder);
+        qDebug().noquote() << "十六进制校验码：" << checkcode;
+        ui->lineEdit_Checkcode_Dec->setText(QString::number(ret32));
+        break;
+    default:
+        ;
+    }
+    ui->lineEdit_Checkcode->setText(checkcode);
+    ui->textEdit_ByteString->setText(tcInstance.StringNoNullToNull(hexStr+checkcode));
+
+}
+
+void DataCheckForm::onRadioClickSelecByteOrder()
+{
+    // 通过ID来获取选中的radioButton的方法
+    int idNumber = sendModeGroup->checkedId();
+    switch (idNumber)
+    {
+    case 0: // 小端字节序存储：低在前高在后
+        crcByteOrder = false;
+        break;
+    case 1:
+        crcByteOrder = true;
+        break;
+    default:
+        crcByteOrder = false;
+        break;
+    }
+}
+
+// 把quint16数（十六bit）颠倒过来，算法同InvertUint8
+void DataCheckForm::InvertUint16(quint16 *destUShort, quint16 *srcUShort)
+{
+    quint16 uShort = 0;
+
+    for(auto i = 0; i < 16; i++)
+    {
+        if(*srcUShort & (1 << i))
+        {
+            uShort |= 1 << (15 - i);
+        }
+    }
+
+    *destUShort = uShort;
+}
+
+/****************************Info**********************************************
+* Name: InvertUint8
+* Note: 把字节颠倒过来，如0x12变成0x48
+*       0x12: 0001 0010
+*       0x48: 0100 1000
+*****************************************************************************/
+void DataCheckForm::InvertUint8(quint8 *destUch, quint8 *srcUch)
+{
+    quint8 uCh = 0;  // 临时变量，暂存翻转后的值
+
+    for(auto i = 0; i < 8; i++)
+    {
+        if(*srcUch & (1 << i))
+        {   // 判断srcUch的第i位，若为1，则翻转后的第7-i位置1
+            uCh |= 1 << (7-i);   // 将ch的第7-i位置1
+        }
+    }
+
+    *destUch = uCh;
+}
+
+void DataCheckForm::on_checkBox_FormatData_stateChanged(int arg1)
+{
+    QString sendStr = ui->textEdit_ByteString->toPlainText();
+    if(arg1 == 2)
+    {
+        QByteArray ba = tcInstance.HexStringToByteArray(sendStr);
+        sendStr = ba.toHex(' ').data();
+    }
+    else if(arg1 == 0)
+    {
+        sendStr = sendStr.remove(" ");
+    }
+    ui->textEdit_ByteString->setText(sendStr.toUpper());
+}
+
+void DataCheckForm::on_textEdit_ByteString_textChanged()
+{
+    QTextCursor cursor = ui->textEdit_ByteString->textCursor();   // 光标
+    quint16 lineNum = cursor.blockNumber(); // 行号
+    quint16 posInBlock = cursor.positionInBlock(); // 光标所在行的位置，从左边开始计算
+    QString lineText = ui->textEdit_ByteString->document()->findBlockByLineNumber(lineNum).text();
+
+    /* 按回车会新开一行，如果判断光标在行首位置且行号大于0则认为新开一行，把光标向下移动一行*/
+    if(posInBlock == 0 && lineNum > 0)
+    {
+        cursor.movePosition(QTextCursor::Down);
+        ui->textEdit_ByteString->setTextCursor(cursor);
+        return;
+    }
+    char ch = ' ';
+    // 光标所在行的位置大于等于1，才取前一个字符，这是为了预防按下Backspace键回退到一行开始处的位置，会导致lineText.at(posInBlock-1)访问越界
+    if(posInBlock >= 1)
+    {
+        ch = lineText.at(posInBlock-1).toLatin1();
+    }
+    if((ch == ' ') || (ch >= '0' && ch <='9') || (ch >='a' && ch <= 'f') || (ch >='A' && ch <= 'F'))
+    {
+        return;
+    }
+    else
+    {
+        cursor.deletePreviousChar();
+        ui->textEdit_ByteString->setTextCursor(ui->textEdit_ByteString->textCursor());
     }
 }
