@@ -7,6 +7,7 @@
 #include "ui_udpform.h"
 #include "unicastform.h"
 #include "datacheckform.h"
+#include "numberconvertform.h"
 
 class UDPTEST_EXPORT UDPTest
         :public QWidget
@@ -37,8 +38,10 @@ private:
     quint16 unicastFormNum = 1;
     // Unicast Communication Form
     UnicastForm *unicastForm = nullptr;
-    // Data check form
+    // Data Check Form
     DataCheckForm *dataCheckForm = nullptr;
+    // Number Convert Form
+    NumberConvertForm *numberConvertForm = nullptr;
 
 };
 

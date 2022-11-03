@@ -28,25 +28,25 @@ public:
     enum CRC8_Mode
     {
         Crc8 = 0,
-        CRC8_ITU,
-        CRC8_ROHC,
+        Crc8_ITU,
+        Crc8_ROHC,
         Crc8_MAXIM,
     };
     enum CRC16_Mode
     {
-        CRC16_CCITT_True = 0,
-        CRC16_CCITT_FALSE,
-        CRC16_XMODEM,
-        CRC16_X25,
-        CRC16_MODBUS,
+        Crc16_CCITT_True = 0,
+        Crc16_CCITT_False,
+        Crc16_XMODEM,
+        Crc16_X25,
+        Crc16_MODBUS,
         Crc16_IBM,
-        CRC16_MAXIM,
+        Crc16_MAXIM,
         Crc16_USB,
-        CRC16_DNP,
+        Crc16_DNP,
     };
     enum CRC32_Mode
     {
-        CRC32_WinRAR = 0,
+        Crc32_WinRAR = 0,
         Crc32_MPEG
     };
     Q_ENUM(CRC8_Mode)
@@ -56,10 +56,20 @@ public:
     // Qt反射：就是运行时把字符串映射为类，函数声明时必须使用Q_INVOKABLE
     Q_INVOKABLE quint8 CRC8(char *data, quint16 dataLen);
     Q_INVOKABLE quint8 CRC8_MAXIM(char *data, quint16 dataLen);
+    Q_INVOKABLE quint8 CRC8_ITU(char *data, quint16 dataLen);
+    Q_INVOKABLE quint8 CRC8_ROHC(char *data, quint16 dataLen);
 
-    Q_INVOKABLE quint16 CRC16_USB(char* data, quint16 dataLen);
+    Q_INVOKABLE quint16 CRC16_CCITT_TRUE(char *data, quint16 dataLen);
+    Q_INVOKABLE quint16 CRC16_CCITT_FALSE(char *data, quint16 dataLen);
+    Q_INVOKABLE quint16 CRC16_XMODEM(char *data, quint16 dataLen);
+    Q_INVOKABLE quint16 CRC16_X25(char *data, quint16 dataLen);
+    Q_INVOKABLE quint16 CRC16_MODBUS(char *data, quint16 dataLen);
     Q_INVOKABLE quint16 CRC16_IBM(char* data, quint16 dataLen);
+    Q_INVOKABLE quint16 CRC16_MAXIM(char *data, quint16 dataLen);
+    Q_INVOKABLE quint16 CRC16_USB(char* data, quint16 dataLen);
+    Q_INVOKABLE quint16 CRC16_DNP(char *data, quint16 dataLen);
 
+    Q_INVOKABLE quint32 CRC32_WINRAR(char *data, quint16 dataLen);         // WinRar使用该校验算法
     Q_INVOKABLE quint32 CRC32_MPEG(char *data, quint16 dataLen);    // MPEG使用该校验算法
 
 private slots:
@@ -112,6 +122,7 @@ private slots:
 private:
     void InvertUint16(quint16 *destUShort, quint16 *srcUShort);
     void InvertUint8(quint8 *destUch, quint8 *srcUch);
+    void InvertUint32(quint32 *destUInt, quint32 *srcUInt);
 
     Ui::DataCheckForm *ui;
     // Variables for TypeConvert

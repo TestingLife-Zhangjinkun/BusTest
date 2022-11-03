@@ -30,12 +30,62 @@ quint16 DataCheckForm::CRC16_USB(char *data, quint16 dataLen)
 
 }
 
+quint16 DataCheckForm::CRC16_DNP(char *data, quint16 dataLen)
+{
+    quint16 initValue = 0x0000;
+    quint16 poly = 0x3D65;
+
+    InvertUint16(&poly, &poly);
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(int i = 0;i < 8;i++)
+        {
+            if(initValue & 0x01)
+            {
+                initValue = (initValue >> 1) ^ poly;
+            }
+            else
+            {
+                initValue = (initValue >> 1);
+            }
+        }
+    }
+
+    return (initValue ^ 0xFFFF);
+}
+
+quint32 DataCheckForm::CRC32_WINRAR(char *data, quint16 dataLen)
+{
+    quint32 initValue = 0xFFFFFFFF;
+    quint32 poly = 0x04C11DB7;
+
+    InvertUint32(&poly, &poly);
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(int i = 0;i < 8;i++)
+        {
+            if(initValue & 0x01)
+            {
+                initValue = (initValue >> 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue >> 1;
+            }
+        }
+    }
+
+    return (initValue ^ 0xFFFFFFFF) ;
+}
+
 quint16 DataCheckForm::CRC16_IBM(char *data, quint16 dataLen)
 {
     quint16 initValue = 0x0000;
     quint16 poly = 0x8005;
 
-    //    InvertUint16(&poly, &poly);
+    InvertUint16(&poly, &poly);
     while (dataLen--)
     {
         initValue ^= *(data++);
@@ -48,6 +98,31 @@ quint16 DataCheckForm::CRC16_IBM(char *data, quint16 dataLen)
         }
     }
     return initValue;
+}
+
+quint16 DataCheckForm::CRC16_MAXIM(char *data, quint16 dataLen)
+{
+    quint16 initValue = 0x0000;
+    quint16 poly = 0x8005;
+
+    InvertUint16(&poly, &poly);
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(auto i = 0; i < 8; i++)
+        {
+            if(initValue & 0x01)
+            {
+                initValue = (initValue >> 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue >> 1;
+            }
+        }
+    }
+
+    return (initValue ^ 0xFFFF);
 }
 
 /****************************Info**********************************************
@@ -210,6 +285,220 @@ quint8 DataCheckForm::CRC8_MAXIM(char *data, quint16 dataLen)
     {
         initValue ^= *(data++);
         for(auto i = 0; i < 8; i++)
+        {
+            if(initValue & 0x01)
+            {
+                initValue = (initValue >> 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue >> 1;
+            }
+        }
+    }
+
+    return initValue;
+}
+
+/****************************Info**********************************************
+* Name:    CRC-8/ITU           x8+x2+x+1
+* Width:	8
+* Poly:    0x07
+* Init:    0x00
+* Refin:   False
+* Refout:  False
+* Xorout:  0x55
+* Alias:   CRC-8/ATM
+*****************************************************************************/
+quint8 DataCheckForm::CRC8_ITU(char *data, quint16 dataLen)
+{
+    quint8 initValue = 0x00;
+    quint8 poly = 0x07;
+
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(auto i = 0;i < 8;i++)
+        {
+            if(initValue & 0x80)
+            {
+                initValue = (initValue << 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue << 1;
+            }
+        }
+    }
+
+    return (initValue ^ 0x55);
+}
+
+/****************************Info**********************************************
+* Name:    CRC-8/ROHC          x8+x2+x+1
+* Width:	8
+* Poly:    0x07
+* Init:    0xFF
+* Refin:   True
+* Refout:  True
+* Xorout:  0x00
+* Note:
+*****************************************************************************/
+quint8 DataCheckForm::CRC8_ROHC(char *data, quint16 dataLen)
+{
+    quint8 initValue = 0xFF;
+    quint8 poly = 0x07;
+
+    InvertUint8(&poly, &poly);
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(auto i = 0; i < 8; i++)
+        {
+            if(initValue & 0x01)
+            {
+                initValue = (initValue >> 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue >> 1;
+            }
+        }
+    }
+
+    return initValue;
+}
+
+//这里为了效率，我们不需要将所有Refin和refout为true的输入输出数据移位转换
+//只需要将poly二项式转换后，运算时将左移变为右移
+quint16 DataCheckForm::CRC16_CCITT_TRUE(char *data, quint16 dataLen)
+{
+    quint16 initValue = 0x0000;     // 初始值
+    quint16 poly = 0x1021;          // 多项式
+
+    InvertUint16(&poly, &poly);
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(int i = 0;i < 8;i++)
+        {
+            if(initValue & 0x01)
+            {
+                initValue = (initValue >> 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue >> 1;
+            }
+        }
+    }
+
+    return initValue;
+}
+
+/****************************Info**********************************************
+* Name:    CRC-16/CCITT-FALSE   x16+x12+x5+1
+* Width:	16
+* Poly:    0x1021
+* Init:    0xFFFF
+* Refin:   False
+* Refout:  False
+* Xorout:  0x0000
+* Note:
+*****************************************************************************/
+quint16 DataCheckForm::CRC16_CCITT_FALSE(char *data, quint16 dataLen)
+{
+    quint16 initValue = 0xFFFF;
+    quint16 poly = 0x1021;
+
+    while (dataLen--)
+    {
+        initValue ^= *(data++) << 8;
+        for(int i = 0;i < 8; i++)
+        {
+            if(initValue & 0x8000)
+            {
+                initValue = (initValue << 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue << 1;
+            }
+        }
+    }
+
+    return initValue;
+}
+
+/****************************Info**********************************************
+* Name:    CRC-16/XMODEM       x16+x12+x5+1
+* Width:	16
+* Poly:    0x1021
+* Init:    0x0000
+* Refin:   False
+* Refout:  False
+* Xorout:  0x0000
+* Alias:   CRC-16/ZMODEM,CRC-16/ACORN
+*****************************************************************************/
+quint16 DataCheckForm::CRC16_XMODEM(char *data, quint16 dataLen)
+{
+    quint16 initValue = 0x0000;
+    quint16 poly = 0x1021;
+
+    while (dataLen--)
+    {
+        initValue ^= (*(data++) << 8);
+        for(int i = 0; i < 8; i++)
+        {
+            if(initValue & 0x8000)
+            {
+                initValue = (initValue << 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue << 1;
+            }
+        }
+    }
+
+    return initValue;
+}
+
+quint16 DataCheckForm::CRC16_X25(char *data, quint16 dataLen)
+{
+    quint16 initValue = 0xFFFF;
+    quint16 poly = 0x1021;
+
+    InvertUint16(&poly, &poly);
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(auto i = 0; i < 8; i++)
+        {
+            if(initValue & 0x01)
+            {
+                initValue = (initValue >> 1) ^ poly;
+            }
+            else
+            {
+                initValue = initValue >> 1;
+            }
+        }
+    }
+
+    return (initValue ^ 0xFFFF);
+}
+
+quint16 DataCheckForm::CRC16_MODBUS(char *data, quint16 dataLen)
+{
+    quint16 initValue = 0xFFFF;
+    quint16 poly = 0x8005;
+
+    InvertUint16(&poly, &poly);
+    while (dataLen--)
+    {
+        initValue ^= *(data++);
+        for(int i = 0;i < 8;i++)
         {
             if(initValue & 0x01)
             {
@@ -773,6 +1062,19 @@ void DataCheckForm::InvertUint8(quint8 *destUch, quint8 *srcUch)
     }
 
     *destUch = uCh;
+}
+
+void DataCheckForm::InvertUint32(quint32 *destUInt, quint32 *srcUInt)
+{
+    quint32 uInt = 0;
+
+    for(auto i=0; i< 32; i++)
+    {
+        if(*srcUInt & (1 << i))
+            uInt |= 1 << (31 - i);
+    }
+
+    *destUInt = uInt;
 }
 
 void DataCheckForm::on_checkBox_FormatData_stateChanged(int arg1)

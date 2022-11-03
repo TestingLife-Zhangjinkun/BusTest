@@ -16,6 +16,7 @@ DESTDIR     = ../Plugin
 
 SOURCES += \
     datacheckform.cpp \
+    numberconvertform.cpp \
     typeconvert.cpp \
     udpform.cpp \
     udptest.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
 HEADERS += \
     UDPTest_global.h \
     datacheckform.h \
+    numberconvertform.h \
     typeconvert.h \
     udpform.h \
     udptest.h \
@@ -37,5 +39,6 @@ unix {
 
 FORMS += \
     datacheckform.ui \
+    numberconvertform.ui \
     udpform.ui \
     unicastform.ui

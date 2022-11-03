@@ -55,6 +55,7 @@ void UDPTest::InitUDPWidget()
 //    ui->tabWidget->addTab(new MulticastForm(), QIcon(QPixmap("../Plugins/UDPTest/res/png/multicast.jpeg")), "组播和广播通信");
 //    ui->tabWidget->addTab(new FileSendForm(), QIcon(QPixmap("../Plugins/UDPTest/res/png/DataSend.jpg")), "文件发送");
     ui->tabWidget->addTab(new DataCheckForm(), QIcon(QPixmap("res/png/UDPPlugin/DataSend.jpg")), "Data Check");
+    ui->tabWidget->addTab(new NumberConvertForm(), QIcon(QPixmap("../Plugins/UDPTest/res/png/DataSend.jpg")), "Number Convert");
 
     ui->tabWidget->tabBar()->setDocumentMode(true);
     ui->tabWidget->tabBar()->setExpanding(true);
