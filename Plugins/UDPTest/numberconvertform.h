@@ -15,6 +15,9 @@ public:
     explicit NumberConvertForm(QWidget *parent = nullptr);
     ~NumberConvertForm();
 
+private slots:
+    void on_pushButton_ShowCRCParams_clicked();
+
 private:
     Ui::NumberConvertForm *ui;
 };

@@ -1,4 +1,4 @@
-QT += widgets
+QT += widgets axcontainer
 
 TEMPLATE = lib
 DEFINES += UDPTEST_LIBRARY
