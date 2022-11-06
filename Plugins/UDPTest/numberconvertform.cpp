@@ -7,6 +7,7 @@
 #include <QScrollBar>
 #include <QMetaEnum>
 #include <QTextBlock>
+#include <QCryptographicHash>
 
 NumberConvertForm::NumberConvertForm(QWidget *parent) :
     QWidget(parent),
@@ -14,9 +15,9 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
-//    ui->tableWidget->clear();
-//    // 只设置列数，行数动态增加
-//    ui->tableWidget->setColumnCount(6);
+    //    ui->tableWidget->clear();
+    //    // 只设置列数，行数动态增加
+    //    ui->tableWidget->setColumnCount(6);
     // 设置整行选中的方式
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     // 设置不可编辑
@@ -24,17 +25,17 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     // 设置可以选中单行
     ui->tableWidget->setSelectionMode(QAbstractItemView::/*ExtendedSelection*/SingleSelection);
     //设置无边框
-//    ui->tableWidget->setFrameShape(QFrame::NoFrame);
+    //    ui->tableWidget->setFrameShape(QFrame::NoFrame);
     //设置不显示格子线
-//    ui->tableWidget->setShowGrid(false);
+    //    ui->tableWidget->setShowGrid(false);
     //设置行号列,true为显示
-//    ui->tableWidget->verticalHeader()->setVisible(false);
+    //    ui->tableWidget->verticalHeader()->setVisible(false);
     // 设置表头高度
     ui->tableWidget->horizontalHeader()->setFixedHeight(30);
     // 设置选中行背景色
-//    ui->tableWidget->setStyleSheet("selection-background-color:blue");
+    //    ui->tableWidget->setStyleSheet("selection-background-color:blue");
     // 设置表头 背景色
-//    ui->tableWidget->horizontalHeader()->setStyleSheet("QHeaderView::section{background:red;}");
+    //    ui->tableWidget->horizontalHeader()->setStyleSheet("QHeaderView::section{background:red;}");
 
     //设置水平、垂直滚动条样式,添加头文件 #include <QScrollBar>
     ui->tableWidget->horizontalScrollBar()->setStyleSheet("QScrollBar{background:transparent; height:10px;}"
@@ -50,9 +51,9 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
                                                         "QScrollBar::sub-line{background:transparent;}"
                                                         "QScrollBar::add-line{background:transparent;}");
     // 调整内容大小
-//    ui->tableWidget->resizeRowsToContents();
+    //    ui->tableWidget->resizeRowsToContents();
     // 标题头的大小
-//    ui->tableWidget->horizontalHeader()->setDefaultSectionSize(200);
+    //    ui->tableWidget->horizontalHeader()->setDefaultSectionSize(200);
     // 横向先自适应宽度
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     //设置标题头的字体样式
@@ -62,7 +63,7 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     //设置充满表宽度
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
     //设置行距
-//    ui->tableWidget->verticalHeader()->setDefaultSectionSize(10);
+    //    ui->tableWidget->verticalHeader()->setDefaultSectionSize(10);
 
     // 由于读取Excel文件速度慢，所以打开窗体前读取CRC配置文件一次，保存到Vector中
     QString fileName = tr("%1/config/data/CRC.xlsx").arg(QDir::currentPath());
@@ -159,7 +160,7 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     }
 
     //******************************//
-    QStringList byteLengthList = {"1子节", "2子节", "4子节"};
+    QStringList byteLengthList = {"1子节", "2子节", "4子节", "其它"};
     ui->comboBox_ChecksumLength->blockSignals(true);
     ui->comboBox_ChecksumLength->addItems(byteLengthList);
     ui->comboBox_ChecksumLength->blockSignals(false);
@@ -194,9 +195,9 @@ void NumberConvertForm::on_pushButton_ShowCRCParams_clicked()
     ui->tableWidget->setRowCount(0);
     ui->tableWidget->clearContents();
 
-//    ui->tableWidget->removeRow()
+    //    ui->tableWidget->removeRow()
     // 调整内容大小
-//    ui->tableWidget->resizeRowsToContents();
+    //    ui->tableWidget->resizeRowsToContents();
     // 标题头的大小
     ui->tableWidget->horizontalHeader()->setDefaultSectionSize(200);
     // 横向先自适应宽度
@@ -208,7 +209,7 @@ void NumberConvertForm::on_pushButton_ShowCRCParams_clicked()
     //设置充满表宽度
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
     //设置行距
-//    ui->tableWidget->verticalHeader()->setDefaultSectionSize(10);
+    //    ui->tableWidget->verticalHeader()->setDefaultSectionSize(10);
 
     // 行数、列数
     const quint16 rowCount = crc16Data.size();
@@ -254,9 +255,9 @@ void NumberConvertForm::on_pushButton_ShowCRCParams_clicked()
         }
     }
     // 然后设置要根据内容适应宽度的列。Note：需要在表格添加内容之后再设置
-//    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    //    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     //清除表格数据区的内容，但不清除表头
-//    ui->tableWidget->clearContents();
+    //    ui->tableWidget->clearContents();
 }
 
 // 初始化校验算法下拉列表框
@@ -287,6 +288,11 @@ void NumberConvertForm::on_comboBox_ChecksumLength_currentIndexChanged(int index
             ui->comboBox_CheckAlgorithm->addItem(me.key(i));
         // 显示支持的CRC32算法配置列表
         DisPlay_CRC32_Configation_List();
+        break;
+    case 3:
+        me = QMetaEnum::fromType<NumberConvertForm::Hash_Mode>();
+        for(auto i = 0; i < me.keyCount(); ++i)
+            ui->comboBox_CheckAlgorithm->addItem(me.key(i));
         break;
     default:
         break;
@@ -325,6 +331,14 @@ void NumberConvertForm::on_pushButton_Generate_Checkcode_clicked()
                                                Q_RETURN_ARG(quint32, ret32),
                                                Q_ARG(char*, pCrcCheckSum), Q_ARG(quint16, ba.size()));
         break;
+    case 3: // 处理其它子节长度，如MD5算法
+    {
+        ba = MD5(tcInstance.HexStringToByteArray(hexStr));
+        QString checkcode = tcInstance.DecToHexString(ret8, 1, !crcByteOrder);
+        ui->lineEdit_Checkcode->setText(checkcode);
+        ui->textEdit_ByteString->setText(tcInstance.StringNoNullToNull(hexStr+checkcode));
+    }
+        return;
     default:
         ;
     }
@@ -582,6 +596,15 @@ quint32 NumberConvertForm::CRC32_MPEG(char *data, quint16 dataLen)
     }
 
     return initValue;
+}
+
+// MD5加密算法 20221107
+QByteArray NumberConvertForm::MD5(const QByteArray &data)
+{
+    QString str = ui->textEdit_ByteString->toPlainText();
+    QByteArray hashData = QCryptographicHash::hash(str.toLocal8Bit(), QCryptographicHash::Md5);
+    qInfo().noquote() << tcInstance.ByteArrayToHexString(hashData);
+    return hashData;
 }
 
 quint8 NumberConvertForm::CRC8(char *data, quint16 dataLen)
@@ -1002,9 +1025,9 @@ void NumberConvertForm::DisPlay_CRC16_Configation_List()
         }
     }
     // 然后设置要根据内容适应宽度的列。Note：需要在表格添加内容之后再设置
-//    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    //    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     //清除表格数据区的内容，但不清除表头
-//    ui->tableWidget->clearContents();
+    //    ui->tableWidget->clearContents();
 }
 
 void NumberConvertForm::DisPlay_CRC32_Configation_List()

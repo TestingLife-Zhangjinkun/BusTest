@@ -48,9 +48,15 @@ public:
         Crc32_WinRAR = 0,
         Crc32_MPEG
     };
+    enum Hash_Mode
+    {
+        md5 = 0
+    };
+
     Q_ENUM(CRC8_Mode)
     Q_ENUM(CRC16_Mode)
     Q_ENUM(CRC32_Mode)
+    Q_ENUM(Hash_Mode)
 
     // Qt反射：就是运行时把字符串映射为类，函数声明时必须使用Q_INVOKABLE
     Q_INVOKABLE quint8 CRC8(char *data, quint16 dataLen);
@@ -70,6 +76,9 @@ public:
 
     Q_INVOKABLE quint32 CRC32_WINRAR(char *data, quint16 dataLen);         // WinRar使用该校验算法
     Q_INVOKABLE quint32 CRC32_MPEG(char *data, quint16 dataLen);    // MPEG使用该校验算法
+
+    // MD5加密算法
+    Q_INVOKABLE QByteArray MD5(const QByteArray &data);
 
 private slots:
     void on_pushButton_ShowCRCParams_clicked();
