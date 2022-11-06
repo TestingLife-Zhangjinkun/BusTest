@@ -85,7 +85,6 @@ private slots:
 
     void on_checkBox_LittleEndian2_stateChanged(int arg1);
 
-
     void on_lineEdit_Hex2_textChanged(const QString &arg1);
 
     void on_pushButton_Convert3_clicked();

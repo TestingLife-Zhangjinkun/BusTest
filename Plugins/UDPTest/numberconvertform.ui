@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="pushButton_ShowCRCParams">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>210</y>
+     <x>10</x>
+     <y>270</y>
      <width>120</width>
      <height>23</height>
     </rect>
@@ -30,11 +30,165 @@
    <property name="geometry">
     <rect>
      <x>5</x>
-     <y>260</y>
+     <y>300</y>
      <width>780</width>
      <height>200</height>
     </rect>
    </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_CRCChecksum">
+   <property name="geometry">
+    <rect>
+     <x>5</x>
+     <y>10</y>
+     <width>775</width>
+     <height>170</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>CRC校验</string>
+   </property>
+   <widget class="QTextEdit" name="textEdit_ByteString">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>500</width>
+      <height>140</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_ChecksumLength">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>20</y>
+      <width>100</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_22">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>20</y>
+      <width>70</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>校验码长度：</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_23">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>50</y>
+      <width>70</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>校验算法：</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_CheckAlgorithm">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>50</y>
+      <width>100</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_Generate_Checkcode">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>80</y>
+      <width>80</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>产生校验码</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Checkcode">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>80</y>
+      <width>100</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_13">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>120</y>
+      <width>50</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>字节序：</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButton_SmallStorage">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>120</y>
+      <width>70</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>小端存储</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButton_BigStorage">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>120</y>
+      <width>70</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>大端存储</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_FormatData">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>140</y>
+      <width>100</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>格式化数据</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Checkcode_Dec">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>80</y>
+      <width>60</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>
