@@ -8,6 +8,9 @@
 #include <QMetaEnum>
 #include <QTextBlock>
 #include <QCryptographicHash>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QMimeDatabase>
 
 NumberConvertForm::NumberConvertForm(QWidget *parent) :
     QWidget(parent),
@@ -85,69 +88,77 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     // 获取文件的所有Sheet页
     QAxObject *sheets = workBook->querySubObject("WorkSheets");
     // 获取文件Sheet页
-    QAxObject *sheet = sheets->querySubObject("Item(QString)", "CRC16");
+    QAxObject *usedRange = nullptr;
+    QAxObject *sheet = nullptr;
+    sheet = sheets->querySubObject("Item(QString)", "CRC16");
     if(nullptr == sheet)
     {
-        qInfo().noquote() << "CRC16 Sheet页不存在";
-        return;
+        qInfo().noquote() << "CRC16 Sheet页不存在!";
     }
-    // 有数据的矩形区域
-    QAxObject *usedRange = sheet->querySubObject("UsedRange");
-    // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
-    QVariant var = usedRange->dynamicCall("Value");
-    // 保存CRC16配置参数
-    foreach(QVariant varRow, var.toList())
+    else
     {
-        QVector<QString> vecDataRow;
-        foreach(QVariant var, varRow.toList())
+        // 有数据的矩形区域
+        usedRange = sheet->querySubObject("UsedRange");
+        // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
+        QVariant var = usedRange->dynamicCall("Value");
+        // 保存CRC16配置参数
+        foreach(QVariant varRow, var.toList())
         {
-            vecDataRow.push_back(var.toString());
+            QVector<QString> vecDataRow;
+            foreach(QVariant var, varRow.toList())
+            {
+                vecDataRow.push_back(var.toString());
+            }
+            crc16Data.push_back(vecDataRow);
         }
-        crc16Data.push_back(vecDataRow);
     }
 
     // 初始化CRC8算法配置QVector
     sheet = sheets->querySubObject("Item(QString)", "CRC8");
     if(nullptr == sheet)
     {
-        qInfo().noquote() << "CRC8 Sheet页不存在";
-        return;
+        qInfo().noquote() << "CRC8 Sheet页不存在!";
     }
-    // 有数据的矩形区域
-    usedRange = sheet->querySubObject("UsedRange");
-    // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
-    var = usedRange->dynamicCall("Value");
-    // 保存CRC8配置参数
-    foreach(QVariant varRow, var.toList())
+    else
     {
-        QVector<QString> vecDataRow;
-        foreach(QVariant var, varRow.toList())
+        // 有数据的矩形区域
+        usedRange = sheet->querySubObject("UsedRange");
+        // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
+        QVariant var = usedRange->dynamicCall("Value");
+        // 保存CRC8配置参数
+        foreach(QVariant varRow, var.toList())
         {
-            vecDataRow.push_back(var.toString());
+            QVector<QString> vecDataRow;
+            foreach(QVariant var, varRow.toList())
+            {
+                vecDataRow.push_back(var.toString());
+            }
+            crc8Data.push_back(vecDataRow);
         }
-        crc8Data.push_back(vecDataRow);
     }
 
     // 初始化CRC32算法配置QVector
     sheet = sheets->querySubObject("Item(QString)", "CRC32");
     if(nullptr == sheet)
     {
-        qInfo().noquote() << "CRC32 Sheet页不存在";
-        return;
+        qInfo().noquote() << "CRC32 Sheet页不存在!";
     }
-    // 有数据的矩形区域
-    usedRange = sheet->querySubObject("UsedRange");
-    // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
-    var = usedRange->dynamicCall("Value");
-    // 保存CRC32配置参数
-    foreach(QVariant varRow, var.toList())
+    else
     {
-        QVector<QString> vecDataRow;
-        foreach(QVariant var, varRow.toList())
+        // 有数据的矩形区域
+        usedRange = sheet->querySubObject("UsedRange");
+        // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
+        QVariant var = usedRange->dynamicCall("Value");
+        // 保存CRC32配置参数
+        foreach(QVariant varRow, var.toList())
         {
-            vecDataRow.push_back(var.toString());
+            QVector<QString> vecDataRow;
+            foreach(QVariant var, varRow.toList())
+            {
+                vecDataRow.push_back(var.toString());
+            }
+            crc32Data.push_back(vecDataRow);
         }
-        crc32Data.push_back(vecDataRow);
     }
 
     // 关闭文件
@@ -333,10 +344,10 @@ void NumberConvertForm::on_pushButton_Generate_Checkcode_clicked()
         break;
     case 3: // 处理其它子节长度，如MD5算法
     {
-        ba = MD5(tcInstance.HexStringToByteArray(hexStr));
-        QString checkcode = tcInstance.DecToHexString(ret8, 1, !crcByteOrder);
-        ui->lineEdit_Checkcode->setText(checkcode);
-        ui->textEdit_ByteString->setText(tcInstance.StringNoNullToNull(hexStr+checkcode));
+        MD5(ba);
+        ba = QCryptographicHash::hash(tcInstance.HexStringToByteArray(hexStr), QCryptographicHash::Md5);
+        QString md5Result = tcInstance.ByteArrayToHexString(ba);
+        ui->textEdit_ByteString->setText(tcInstance.StringNoNullToNull(hexStr + md5Result));
     }
         return;
     default:
@@ -601,8 +612,7 @@ quint32 NumberConvertForm::CRC32_MPEG(char *data, quint16 dataLen)
 // MD5加密算法 20221107
 QByteArray NumberConvertForm::MD5(const QByteArray &data)
 {
-    QString str = ui->textEdit_ByteString->toPlainText();
-    QByteArray hashData = QCryptographicHash::hash(str.toLocal8Bit(), QCryptographicHash::Md5);
+    QByteArray hashData = QCryptographicHash::hash(data, QCryptographicHash::Md5);
     qInfo().noquote() << tcInstance.ByteArrayToHexString(hashData);
     return hashData;
 }
@@ -1082,3 +1092,63 @@ void NumberConvertForm::DisPlay_CRC32_Configation_List()
     }
 }
 
+// 产生MD5校验码 20221107
+void NumberConvertForm::on_pushButton_Generate_MD5_clicked()
+{
+    QString hexStr = ui->textEdit_MD5Input->toPlainText();
+    QByteArray ba = QCryptographicHash::hash(tcInstance.HexStringToByteArray(hexStr), QCryptographicHash::Md5);
+    QString md5Result = tcInstance.ByteArrayToHexString(ba);
+    ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
+    ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(hexStr + md5Result));
+}
+
+// 选择MD5输入文件
+void NumberConvertForm::on_pushButton_Select_File_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "打开文件数据源", "", "所有文件(*.*)");
+    if(!fileName.isEmpty())
+        ui->lineEdit_File_Data_Source->setText(fileName);
+}
+
+// 计算文件的MD5校验码 20221107
+void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
+{
+    // 文件内容大小常量，小于loadSize，一次性读取所有内容计算MD5值；大于则分段读取文件内容，计算MD5值
+    const quint64 loadSize = 1024*10;
+    QString fileName = ui->lineEdit_File_Data_Source->text();
+    if(fileName.isEmpty())
+    {
+        QMessageBox::information(0, "信息提示", "请先选择数据源文件！");
+        return;
+    }
+
+    QFile file(fileName);
+    QFileInfo fileInfo(file);
+    if(file.open(QIODevice::ReadOnly))
+    {
+        qInfo() << tr("加载文件 %1 成功！").arg(fileName);
+    }
+    else
+    {   // 文件读取失败
+        QString errInfo = tr("读取文件 %1 失败！原因：%2.").arg(fileName).arg(file.errorString());
+        qWarning().noquote() << errInfo;
+        QMessageBox::warning(this, "警告", errInfo);
+    }
+
+    QMimeDatabase db;
+    QMimeType mime = db.mimeTypeForName(fileName);
+    if(mime.inherits("text/plain"))
+    { // 处理文本文件
+        qInfo().noquote() << fileName << "是文本文件！";
+    }
+    else if(mime.inherits("application"))
+    { // 处理二进制文件
+        qInfo().noquote() << fileName << "是二进制文件！";
+    }
+    else
+    {
+        qInfo().noquote() << fileName << "既不是文本文件，也不是二进制文件！";
+    }
+
+
+}

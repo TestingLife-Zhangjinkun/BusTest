@@ -94,6 +94,12 @@ private slots:
 
     void on_textEdit_ByteString_textChanged();
 
+    void on_pushButton_Generate_MD5_clicked();
+
+    void on_pushButton_Select_File_clicked();
+
+    void on_pushButton_Generate_MD5_2_clicked();
+
 private:
     void InvertUint16(quint16 *destUShort, quint16 *srcUShort);
     void InvertUint8(quint8 *destUch, quint8 *srcUch);
