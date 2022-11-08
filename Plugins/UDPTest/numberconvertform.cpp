@@ -191,6 +191,17 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     // 文本框中显示提示信息
     ui->textEdit_ByteString->setPlaceholderText("请输出十六进制字符数据！");
 
+    //zjk 20221108
+    // 初始化MD5输入数据类型单选按钮分组
+    dataTypeGroup = new QButtonGroup(this);
+    dataTypeGroup->addButton(ui->radioButton_ASCII, 0);
+    dataTypeGroup->addButton(ui->radioButton_Hex, 1);
+    // 初始设置输入十六进制数据
+    ui->radioButton_Hex->setChecked(true);
+    // 绑定信号与槽
+    connect(ui->radioButton_ASCII, SIGNAL(clicked()), this, SLOT(onRadioClickSelecDataType()));
+    connect(ui->radioButton_Hex, SIGNAL(clicked()), this, SLOT(onRadioClickSelecDataType()));
+
 }
 
 NumberConvertForm::~NumberConvertForm()
@@ -1096,7 +1107,8 @@ void NumberConvertForm::DisPlay_CRC32_Configation_List()
 void NumberConvertForm::on_pushButton_Generate_MD5_clicked()
 {
     QString hexStr = ui->textEdit_MD5Input->toPlainText();
-    QByteArray ba = QCryptographicHash::hash(tcInstance.HexStringToByteArray(hexStr), QCryptographicHash::Md5);
+    QByteArray ba = tcInstance.HexStringToByteArray(hexStr);
+    ba = QCryptographicHash::hash(tcInstance.HexStringToByteArray(hexStr), QCryptographicHash::Md5);
     QString md5Result = tcInstance.ByteArrayToHexString(ba);
     ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
     ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(hexStr + md5Result));
@@ -1114,7 +1126,7 @@ void NumberConvertForm::on_pushButton_Select_File_clicked()
 void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
 {
     // 文件内容大小常量，小于loadSize，一次性读取所有内容计算MD5值；大于则分段读取文件内容，计算MD5值
-    const quint64 loadSize = 1024*10;
+    const qint64 loadSize = 1024*10;
     QString fileName = ui->lineEdit_File_Data_Source->text();
     if(fileName.isEmpty())
     {
@@ -1124,31 +1136,63 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
 
     QFile file(fileName);
     QFileInfo fileInfo(file);
-    if(file.open(QIODevice::ReadOnly))
-    {
-        qInfo() << tr("加载文件 %1 成功！").arg(fileName);
-    }
-    else
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {   // 文件读取失败
         QString errInfo = tr("读取文件 %1 失败！原因：%2.").arg(fileName).arg(file.errorString());
         qWarning().noquote() << errInfo;
         QMessageBox::warning(this, "警告", errInfo);
+        return;
     }
 
-    QMimeDatabase db;
-    QMimeType mime = db.mimeTypeForName(fileName);
-    if(mime.inherits("text/plain"))
+    QMimeDatabase mimeDatabase;
+    QMimeType mimeType = mimeDatabase.mimeTypeForFile(fileName, QMimeDatabase::MatchDefault);
+    if(mimeType.name().startsWith("text/"))
     { // 处理文本文件
-        qInfo().noquote() << fileName << "是文本文件！";
+        if(fileInfo.size() < loadSize)
+        {
+            QTextStream ts(&file);
+            ts.setCodec("UTF-8");
+            if(md5DataType)
+            { // Hex输入
+                QString hexStr = ts.readAll();
+                QByteArray ba = tcInstance.HexStringToByteArray(hexStr);
+                ba = QCryptographicHash::hash(tcInstance.HexStringToByteArray(hexStr), QCryptographicHash::Md5);
+                QString md5Result = tcInstance.ByteArrayToHexString(ba);
+                ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
+                ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
+            }
+            else
+            { // ASCII输入
+
+            }
+        }
     }
-    else if(mime.inherits("application"))
+    else if(mimeType.name().startsWith("application/"))
     { // 处理二进制文件
-        qInfo().noquote() << fileName << "是二进制文件！";
+        qInfo().noquote() << mimeType.name();
     }
     else
     {
-        qInfo().noquote() << fileName << "既不是文本文件，也不是二进制文件！";
+        qInfo().noquote() << "其它文件类型：" << mimeType.name();
     }
 
 
+}
+
+void NumberConvertForm::onRadioClickSelecDataType()
+{
+    // 通过ID来获取选中的radioButton的方法
+    int idNumber = sendModeGroup->checkedId();
+    switch (idNumber)
+    {
+    case 0: // 输入ASCII数据
+        md5DataType = false;
+        break;
+    case 1:
+        md5DataType = true;
+        break;
+    default:
+        md5DataType = true;
+        break;
+    }
 }

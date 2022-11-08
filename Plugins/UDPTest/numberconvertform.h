@@ -100,6 +100,9 @@ private slots:
 
     void on_pushButton_Generate_MD5_2_clicked();
 
+    // 选择MD5校验码输入数据类型的两个QRadioButton控件的槽函数
+    void onRadioClickSelecDataType();
+
 private:
     void InvertUint16(quint16 *destUShort, quint16 *srcUShort);
     void InvertUint8(quint8 *destUch, quint8 *srcUch);
@@ -120,7 +123,9 @@ private:
     // false：小端存储；true：大端存储。缺省为小端存储
     bool  crcByteOrder = false;
     QButtonGroup *sendModeGroup = nullptr;
-
+    // false：ASCII；true：Hex。缺省为Hex
+    bool  md5DataType = true;
+    QButtonGroup *dataTypeGroup = nullptr;
 };
 
 #endif // NUMBERCONVERTFORM_H
