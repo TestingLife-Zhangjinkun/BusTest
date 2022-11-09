@@ -1107,8 +1107,12 @@ void NumberConvertForm::DisPlay_CRC32_Configation_List()
 void NumberConvertForm::on_pushButton_Generate_MD5_clicked()
 {
     QString hexStr = ui->textEdit_MD5Input->toPlainText();
-    QByteArray ba = tcInstance.HexStringToByteArray(hexStr);
-    ba = QCryptographicHash::hash(tcInstance.HexStringToByteArray(hexStr), QCryptographicHash::Md5);
+    QByteArray ba;
+    if(md5DataType)
+        ba = tcInstance.HexStringToByteArray(hexStr);
+    else
+        ba = hexStr.toUtf8();
+    ba = QCryptographicHash::hash(ba, QCryptographicHash::Md5);
     QString md5Result = tcInstance.ByteArrayToHexString(ba);
     ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
     ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(hexStr + md5Result));
@@ -1136,7 +1140,7 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
 
     QFile file(fileName);
     QFileInfo fileInfo(file);
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if(!file.open(QIODevice::ReadOnly/* | QIODevice::Text*/))
     {   // 文件读取失败
         QString errInfo = tr("读取文件 %1 失败！原因：%2.").arg(fileName).arg(file.errorString());
         qWarning().noquote() << errInfo;
@@ -1148,13 +1152,14 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
     QMimeType mimeType = mimeDatabase.mimeTypeForFile(fileName, QMimeDatabase::MatchDefault);
     if(mimeType.name().startsWith("text/"))
     { // 处理文本文件
+        // Note：fileInfo.size()返回的是文本文件的字符个数，包括空格符 20221109
         if(fileInfo.size() < loadSize)
         {
             QTextStream ts(&file);
             ts.setCodec("UTF-8");
+            QString hexStr = ts.readAll();
             if(md5DataType)
-            { // Hex输入
-                QString hexStr = ts.readAll();
+            { // Hex输入，即对文件内容的十六进制字节串进行MD5校验
                 QByteArray ba = tcInstance.HexStringToByteArray(hexStr);
                 ba = QCryptographicHash::hash(tcInstance.HexStringToByteArray(hexStr), QCryptographicHash::Md5);
                 QString md5Result = tcInstance.ByteArrayToHexString(ba);
@@ -1162,14 +1167,81 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
                 ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
             }
             else
-            { // ASCII输入
-
+            { // ASCII输入，即对文件进行MD5校验
+                QByteArray ba = hexStr.toUtf8();
+                ba = QCryptographicHash::hash(ba, QCryptographicHash::Md5);
+                QString md5Result = tcInstance.ByteArrayToHexString(ba);
+                ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
+                ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
             }
+        }
+        else
+        {
+            QCryptographicHash hash(QCryptographicHash::Md5);
+            qint64 bytesToWrite = fileInfo.size();
+            QByteArray buf;
+            while(bytesToWrite > 0)
+            {
+                buf = file.read(qMin(bytesToWrite, loadSize));
+                bytesToWrite -= buf.length();
+                if(md5DataType)
+                {
+                    // 将读取的ASCII字符转换为十六进制字节串，再计算MD5
+                    QString str(buf);
+                    buf = tcInstance.HexStringToByteArray(str);
+                }
+                hash.addData(buf);
+                buf.resize(0);
+            }
+            QByteArray ba = hash.result();
+            QString md5Result = tcInstance.ByteArrayToHexString(ba);
+            ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
+            ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
         }
     }
     else if(mimeType.name().startsWith("application/"))
     { // 处理二进制文件
         qInfo().noquote() << mimeType.name();
+        qint64 fileSize = fileInfo.size();
+        if(fileInfo.size() < loadSize)
+        {
+            QDataStream in(&file);
+            char* buf = new char[fileSize];
+            qint64 ret = 0;
+            ret = in.readRawData(buf, fileSize);
+            QString hexStr = buf;
+            if(md5DataType)
+            { // Hex输入
+                QByteArray ba = tcInstance.HexStringToByteArray(hexStr);
+                ba = QCryptographicHash::hash(tcInstance.HexStringToByteArray(hexStr), QCryptographicHash::Md5);
+                QString md5Result = tcInstance.ByteArrayToHexString(ba);
+                ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
+                ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
+            }
+        }
+        else
+        {
+            QCryptographicHash hash(QCryptographicHash::Md5);
+            qint64 bytesToWrite = fileInfo.size();
+            QByteArray buf;
+            while(bytesToWrite > 0)
+            {
+                buf = file.read(qMin(bytesToWrite, loadSize));
+                bytesToWrite -= buf.length();
+                if(md5DataType)
+                {
+                    // 将读取的ASCII字符转换为十六进制字节串，再计算MD5
+                    QString str(buf);
+                    buf = tcInstance.HexStringToByteArray(str);
+                }
+                hash.addData(buf);
+                buf.resize(0);
+            }
+            QByteArray ba = hash.result();
+            QString md5Result = tcInstance.ByteArrayToHexString(ba);
+            ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
+            ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
+        }
     }
     else
     {
