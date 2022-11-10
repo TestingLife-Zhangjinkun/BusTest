@@ -202,6 +202,13 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     connect(ui->radioButton_ASCII, SIGNAL(clicked()), this, SLOT(onRadioClickSelecDataType()));
     connect(ui->radioButton_Hex, SIGNAL(clicked()), this, SLOT(onRadioClickSelecDataType()));
 
+    ui->textEdit_MD5Input->setPlaceholderText("请输入MD5校验输入数据！");
+    ui->textEdit_MD5Output->setPlaceholderText("输出MD5校验码！");
+    ui->lineEdit_File_Data_Source->setFocusPolicy(Qt::NoFocus);
+    ui->checkBox_ByteOrder->setCheckState(Qt::Checked);
+    ui->checkBox_FormatData_2->setCheckState(Qt::Unchecked);
+    ui->lineEdit_File_Data_Source->setPlaceholderText("请选择MD5校验文件！");
+
 }
 
 NumberConvertForm::~NumberConvertForm()
@@ -1113,6 +1120,9 @@ void NumberConvertForm::on_pushButton_Generate_MD5_clicked()
     else
         ba = hexStr.toUtf8();
     ba = QCryptographicHash::hash(ba, QCryptographicHash::Md5);
+    // 缺省为大端存储，如果勾选小端存储，则逆序排列校验码
+    if(!ui->checkBox_ByteOrder->isChecked())
+        std::reverse(ba.begin(), ba.end());
     QString md5Result = tcInstance.ByteArrayToHexString(ba);
     ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
     ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(hexStr + md5Result));
@@ -1158,22 +1168,23 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
             QTextStream ts(&file);
             ts.setCodec("UTF-8");
             QString hexStr = ts.readAll();
+            QByteArray ba;
             if(md5DataType)
             { // Hex输入，即对文件内容的十六进制字节串进行MD5校验
-                QByteArray ba = tcInstance.HexStringToByteArray(hexStr);
-                ba = QCryptographicHash::hash(tcInstance.HexStringToByteArray(hexStr), QCryptographicHash::Md5);
-                QString md5Result = tcInstance.ByteArrayToHexString(ba);
-                ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
-                ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
+                ba = tcInstance.HexStringToByteArray(hexStr);
+                ba = QCryptographicHash::hash(ba, QCryptographicHash::Md5);
             }
             else
             { // ASCII输入，即对文件进行MD5校验
-                QByteArray ba = hexStr.toUtf8();
+                ba = hexStr.toUtf8();
                 ba = QCryptographicHash::hash(ba, QCryptographicHash::Md5);
-                QString md5Result = tcInstance.ByteArrayToHexString(ba);
-                ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
-                ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
             }
+            // 缺省为大端存储，如果勾选小端存储，则逆序排列校验码
+            if(!ui->checkBox_ByteOrder->isChecked())
+                std::reverse(ba.begin(), ba.end());
+            QString md5Result = tcInstance.ByteArrayToHexString(ba);
+            ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
+            ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
         }
         else
         {
@@ -1194,6 +1205,9 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
                 buf.resize(0);
             }
             QByteArray ba = hash.result();
+            // 缺省为大端存储，如果勾选小端存储，则逆序排列校验码
+            if(!ui->checkBox_ByteOrder->isChecked())
+                std::reverse(ba.begin(), ba.end());
             QString md5Result = tcInstance.ByteArrayToHexString(ba);
             ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
             ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
@@ -1224,6 +1238,9 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
         }
         delete []buf;
         QByteArray ba = hash.result();
+        // 缺省为大端存储，如果勾选小端存储，则逆序排列校验码
+        if(!ui->checkBox_ByteOrder->isChecked())
+            std::reverse(ba.begin(), ba.end());
         QString md5Result = tcInstance.ByteArrayToHexString(ba);
         ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
     }
@@ -1231,24 +1248,53 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
     {
         qInfo().noquote() << "其它文件类型：" << mimeType.name();
     }
-
-
 }
 
 void NumberConvertForm::onRadioClickSelecDataType()
 {
     // 通过ID来获取选中的radioButton的方法
-    int idNumber = sendModeGroup->checkedId();
+    int idNumber = dataTypeGroup->checkedId();
     switch (idNumber)
     {
     case 0: // 输入ASCII数据
         md5DataType = false;
+        ui->checkBox_FormatData_2->setDisabled(true);
         break;
     case 1:
         md5DataType = true;
+        ui->checkBox_FormatData_2->setEnabled(true);
         break;
     default:
         md5DataType = true;
+        ui->checkBox_FormatData_2->setEnabled(true);
         break;
     }
 }
+
+void NumberConvertForm::on_checkBox_ByteOrder_stateChanged(int arg1)
+{
+    if(arg1 == 2)
+        ui->checkBox_ByteOrder->setText("大端");
+    else
+        ui->checkBox_ByteOrder->setText("小端");
+}
+
+
+void NumberConvertForm::on_checkBox_FormatData_2_stateChanged(int arg1)
+{
+    if(!md5DataType)
+        return;
+    QString sendStr = ui->textEdit_MD5Input->toPlainText();
+    if(arg1 == 2)
+    {
+        QByteArray ba = tcInstance.HexStringToByteArray(sendStr);
+        sendStr = ba.toHex(' ').data();
+    }
+    else if(arg1 == 0)
+    {
+        sendStr = sendStr.remove(" ");
+    }
+    ui->textEdit_MD5Input->setText(sendStr.toUpper());
+
+}
+

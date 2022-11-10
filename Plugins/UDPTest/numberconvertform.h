@@ -103,6 +103,10 @@ private slots:
     // 选择MD5校验码输入数据类型的两个QRadioButton控件的槽函数
     void onRadioClickSelecDataType();
 
+    void on_checkBox_ByteOrder_stateChanged(int arg1);
+
+    void on_checkBox_FormatData_2_stateChanged(int arg1);
+
 private:
     void InvertUint16(quint16 *destUShort, quint16 *srcUShort);
     void InvertUint8(quint8 *destUch, quint8 *srcUch);

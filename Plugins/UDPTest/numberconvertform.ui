@@ -212,19 +212,6 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_MD5Output">
-    <property name="geometry">
-     <rect>
-      <x>580</x>
-      <y>50</y>
-      <width>30</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>输出：</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButton_Generate_MD5">
     <property name="geometry">
      <rect>
@@ -308,6 +295,32 @@
     </property>
     <property name="text">
      <string>Hex</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_ByteOrder">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>50</y>
+      <width>50</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>大端</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_FormatData_2">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>50</y>
+      <width>60</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>格式化</string>
     </property>
    </widget>
   </widget>
