@@ -1203,45 +1203,29 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
     { // 处理二进制文件
         qInfo().noquote() << mimeType.name();
         qint64 fileSize = fileInfo.size();
+        QCryptographicHash hash(QCryptographicHash::Md5);
+        char* buf = new char[loadSize];
+        qint64 ret = 0;
+        QDataStream in(&file);
         if(fileInfo.size() < loadSize)
         {
-            QDataStream in(&file);
-            char* buf = new char[fileSize];
-            qint64 ret = 0;
             ret = in.readRawData(buf, fileSize);
-            QString hexStr = buf;
-            if(md5DataType)
-            { // Hex输入
-                QByteArray ba = tcInstance.HexStringToByteArray(hexStr);
-                ba = QCryptographicHash::hash(tcInstance.HexStringToByteArray(hexStr), QCryptographicHash::Md5);
-                QString md5Result = tcInstance.ByteArrayToHexString(ba);
-                ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
-                ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
-            }
+            hash.addData(buf, ret);
         }
         else
         {
-            QCryptographicHash hash(QCryptographicHash::Md5);
             qint64 bytesToWrite = fileInfo.size();
-            QByteArray buf;
             while(bytesToWrite > 0)
             {
-                buf = file.read(qMin(bytesToWrite, loadSize));
-                bytesToWrite -= buf.length();
-                if(md5DataType)
-                {
-                    // 将读取的ASCII字符转换为十六进制字节串，再计算MD5
-                    QString str(buf);
-                    buf = tcInstance.HexStringToByteArray(str);
-                }
-                hash.addData(buf);
-                buf.resize(0);
+                ret = in.readRawData(buf, qMin(bytesToWrite, loadSize));
+                hash.addData(buf, ret);
+                bytesToWrite -= ret;
             }
-            QByteArray ba = hash.result();
-            QString md5Result = tcInstance.ByteArrayToHexString(ba);
-            ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
-            ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
         }
+        delete []buf;
+        QByteArray ba = hash.result();
+        QString md5Result = tcInstance.ByteArrayToHexString(ba);
+        ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
     }
     else
     {
