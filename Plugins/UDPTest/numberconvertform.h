@@ -30,6 +30,7 @@ public:
         Crc8_ITU,
         Crc8_ROHC,
         Crc8_MAXIM,
+        CheckSum_8,
     };
     enum CRC16_Mode
     {
@@ -53,10 +54,18 @@ public:
         md5 = 0
     };
 
+    enum CHECKSUM_Mode
+    {
+        Checksum_8 = 0,
+        Checksum_8_REVERSE,
+        Checksum_16,
+    };
+
     Q_ENUM(CRC8_Mode)
     Q_ENUM(CRC16_Mode)
     Q_ENUM(CRC32_Mode)
     Q_ENUM(Hash_Mode)
+    Q_ENUM(CHECKSUM_Mode)
 
     // Qt反射：就是运行时把字符串映射为类，函数声明时必须使用Q_INVOKABLE
     Q_INVOKABLE quint8 CRC8(char *data, quint16 dataLen);
@@ -79,6 +88,12 @@ public:
 
     // MD5加密算法
     Q_INVOKABLE QByteArray MD5(const QByteArray &data);
+
+    // 校验和系列算法
+    Q_INVOKABLE quint8 CHECKSUM_8(char *data, quint16 dataLen);
+    Q_INVOKABLE quint8 CHECKSUM_8_REVERSE(char *data, quint16 dataLen);
+    Q_INVOKABLE quint16 CHECKSUM_16(char *data, quint16 dataLen);
+
 
 private slots:
     void on_pushButton_ShowCRCParams_clicked();
@@ -107,6 +122,8 @@ private slots:
 
     void on_checkBox_FormatData_2_stateChanged(int arg1);
 
+    void on_pushButton_Generate_Checksum_clicked();
+
 private:
     void InvertUint16(quint16 *destUShort, quint16 *srcUShort);
     void InvertUint8(quint8 *destUch, quint8 *srcUch);
@@ -130,6 +147,10 @@ private:
     // false：ASCII；true：Hex。缺省为Hex
     bool  md5DataType = true;
     QButtonGroup *dataTypeGroup = nullptr;
+
+    // false：小端存储；true：大端存储。缺省为小端存储
+    bool  checksumByteOrder = false;
+
 };
 
 #endif // NUMBERCONVERTFORM_H

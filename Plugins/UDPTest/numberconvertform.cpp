@@ -209,6 +209,11 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     ui->checkBox_FormatData_2->setCheckState(Qt::Unchecked);
     ui->lineEdit_File_Data_Source->setPlaceholderText("请选择MD5校验文件！");
 
+    // Checksum校验初始化
+    QMetaEnum me = QMetaEnum::fromType<NumberConvertForm::CHECKSUM_Mode>();
+    for(auto i = 0; i < me.keyCount(); ++i)
+        ui->comboBox_CheckSum->addItem(me.key(i));
+
 }
 
 NumberConvertForm::~NumberConvertForm()
@@ -751,6 +756,69 @@ quint8 NumberConvertForm::CRC8_ROHC(char *data, quint16 dataLen)
     }
 
     return initValue;
+}
+
+/***
+ * Checksum算法：在资源相对紧张的一些平台上，运行CRC（循环冗余算法）比较吃力，或者需要快速校验的场合。
+ * 思路：1、使用16位变量保存数据的累加和；
+ *      2、将累加和的高8位和低8位相加；
+ ***/
+quint8 NumberConvertForm::CHECKSUM_8(char *data, quint16 dataLen)
+{
+    quint16 sum = 0;
+
+    while (dataLen--)
+        sum += *(quint8*)(data++);
+
+    // 将16位校验和折算为8位（低8位+高8位）
+    while(sum >> 8)
+        sum = (sum & 0xFF) + (sum >> 8);
+
+    return (quint8)(sum);
+}
+
+/***
+ * Checksum算法：在资源相对紧张的一些平台上，运行CRC（循环冗余算法）比较吃力，或者需要快速校验的场合。
+ * 思路：1、使用16位变量保存数据的累加和；
+ *      2、将累加和的高8位和低8位相加；
+ *      3、对累加和进行取反操作。
+ ***/
+quint8 NumberConvertForm::CHECKSUM_8_REVERSE(char *data, quint16 dataLen)
+{
+    quint16 sum = 0;
+
+    while (dataLen--)
+        sum += *(quint8*)(data++);
+
+    // 将16位校验和折算为8位（低8位+高8位）
+    while(sum >> 8)
+        sum = (sum & 0xFF) + (sum >> 8);
+
+    return (quint8)(~sum);
+}
+
+quint16 NumberConvertForm::CHECKSUM_16(char *data, quint16 dataLen)
+{
+    quint32 sum = 0;
+    quint16* addr = (quint16*)data;
+    quint16 count = dataLen;
+    while (count >= 2)
+    {
+        sum += *((quint16*)addr);
+        (quint16*)(addr++);
+        count -= 2;
+    }
+    if(count == 1)
+    {
+        addr++;
+        sum += *((quint8*)addr);
+    }
+
+    // 将16位校验和折算为8位（低8位+高8位）
+    while(sum >> 16)
+        sum = (sum & 0xFFFF) + (sum >> 16);
+
+    return (quint16)(~sum);
 }
 
 //这里为了效率，我们不需要将所有Refin和refout为true的输入输出数据移位转换
@@ -1296,5 +1364,58 @@ void NumberConvertForm::on_checkBox_FormatData_2_stateChanged(int arg1)
     }
     ui->textEdit_MD5Input->setText(sendStr.toUpper());
 
+}
+
+// 产生校验和 20221112
+void NumberConvertForm::on_pushButton_Generate_Checksum_clicked()
+{
+    QString hexStr = ui->textEdit_ChecksumInput->toPlainText();
+    QByteArray ba = tcInstance.HexStringToByteArray(hexStr);
+    char* pCheckSum = ba.data();    // QByteArray转char*
+    quint8 ret8 = 0;
+    quint8 ret16 = 0;
+    QString methodName = ui->comboBox_CheckSum->currentText().toUpper();
+    bool callResult = false;
+    QString checksum = "";
+    switch (ui->comboBox_CheckSum->currentIndex())
+    {
+    case 0: // 处理Checksum_8
+        callResult = QMetaObject::invokeMethod(&NumberConvertForm::getDCFInstance(), methodName.toLatin1().data(),
+                                               Qt :: AutoConnection, Q_RETURN_ARG(quint8, ret8),
+                                               Q_ARG(char*, pCheckSum), Q_ARG(quint16, ba.size()));
+        checksum = tcInstance.DecToHexString(ret8, 1, !checksumByteOrder);
+        ui->lineEdit_Checksum_Dec->setText(QString::number(ret8));
+        ui->lineEdit_Checksum->setText(checksum);
+        ui->textEdit_ChecksumInput->setText(tcInstance.StringNoNullToNull(hexStr+checksum));
+        break;
+    case 1: // 处理CHECKSUM_8_REVERSE
+        callResult = QMetaObject::invokeMethod(&NumberConvertForm::getDCFInstance(), methodName.toLatin1().data(),
+                                               Qt :: AutoConnection, Q_RETURN_ARG(quint8, ret8),
+                                               Q_ARG(char*, pCheckSum), Q_ARG(quint16, ba.size()));
+        checksum = tcInstance.DecToHexString(ret8, 1, !checksumByteOrder);
+        ui->lineEdit_Checksum_Dec->setText(QString::number(ret8));
+        ui->lineEdit_Checksum->setText(checksum);
+        ui->textEdit_ChecksumInput->setText(tcInstance.StringNoNullToNull(hexStr+checksum));
+        break;
+    case 2: // 处理Checksum_16
+//        callResult = QMetaObject::invokeMethod(&NumberConvertForm::getDCFInstance(), methodName.toLatin1().data(),
+//                                               Qt :: AutoConnection, Q_RETURN_ARG(quint16, ret16),
+//                                               Q_ARG(char*, pCheckSum), Q_ARG(quint16, ba.size()));
+        checksum = tcInstance.DecToHexString(ret8, 1, !checksumByteOrder);
+        ui->lineEdit_Checksum_Dec->setText(QString::number(ret8));
+        ui->lineEdit_Checksum->setText(checksum);
+        ui->textEdit_ChecksumInput->setText(tcInstance.StringNoNullToNull(hexStr+checksum));
+        break;
+    case 3: // 处理其它子节长度，如MD5算法
+
+        return;
+    default:
+        ;
+    }
+    if(!callResult)
+    {
+        ui->lineEdit_Checkcode->setText("调用校验函数失败！");
+        return;
+    }
 }
 
