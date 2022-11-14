@@ -330,11 +330,11 @@
      <x>5</x>
      <y>10</y>
      <width>775</width>
-     <height>90</height>
+     <height>80</height>
     </rect>
    </property>
    <property name="title">
-    <string>校验和</string>
+    <string>Checksum校验</string>
    </property>
    <widget class="QTextEdit" name="textEdit_ChecksumInput">
     <property name="geometry">
@@ -342,16 +342,16 @@
       <x>10</x>
       <y>20</y>
       <width>490</width>
-      <height>60</height>
+      <height>50</height>
      </rect>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBox_CheckSum">
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>570</x>
       <y>20</y>
-      <width>100</width>
+      <width>135</width>
       <height>23</height>
      </rect>
     </property>
@@ -361,7 +361,7 @@
      <rect>
       <x>510</x>
       <y>20</y>
-      <width>70</width>
+      <width>60</width>
       <height>23</height>
      </rect>
     </property>
@@ -372,22 +372,22 @@
    <widget class="QPushButton" name="pushButton_Generate_Checksum">
     <property name="geometry">
      <rect>
-      <x>510</x>
+      <x>620</x>
       <y>50</y>
-      <width>80</width>
+      <width>40</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>产生校验和</string>
+     <string>生成</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_Checksum_Dec">
     <property name="geometry">
      <rect>
-      <x>690</x>
+      <x>710</x>
       <y>50</y>
-      <width>80</width>
+      <width>60</width>
       <height>23</height>
      </rect>
     </property>
@@ -395,13 +395,61 @@
    <widget class="QLineEdit" name="lineEdit_Checksum">
     <property name="geometry">
      <rect>
-      <x>690</x>
+      <x>710</x>
       <y>20</y>
-      <width>80</width>
+      <width>60</width>
       <height>23</height>
      </rect>
     </property>
    </widget>
+   <widget class="QCheckBox" name="checkBox_Checksum_ByteOrder">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>50</y>
+      <width>50</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>大端</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_Checksum_FormatData">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>50</y>
+      <width>60</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>格式化</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_Clear_Checksum">
+    <property name="geometry">
+     <rect>
+      <x>665</x>
+      <y>50</y>
+      <width>40</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>清空</string>
+    </property>
+   </widget>
+   <zorder>textEdit_ChecksumInput</zorder>
+   <zorder>comboBox_CheckSum</zorder>
+   <zorder>label_24</zorder>
+   <zorder>lineEdit_Checksum_Dec</zorder>
+   <zorder>lineEdit_Checksum</zorder>
+   <zorder>pushButton_Generate_Checksum</zorder>
+   <zorder>checkBox_Checksum_ByteOrder</zorder>
+   <zorder>checkBox_Checksum_FormatData</zorder>
+   <zorder>pushButton_Clear_Checksum</zorder>
   </widget>
  </widget>
  <resources/>

@@ -189,7 +189,7 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     connect(ui->radioButton_BigStorage, SIGNAL(clicked()), this, SLOT(onRadioClickSelecByteOrder()));
 
     // 文本框中显示提示信息
-    ui->textEdit_ByteString->setPlaceholderText("请输出十六进制字符数据！");
+    ui->textEdit_ByteString->setPlaceholderText("请输入十六进制字符数据！");
 
     //zjk 20221108
     // 初始化MD5输入数据类型单选按钮分组
@@ -213,6 +213,12 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     QMetaEnum me = QMetaEnum::fromType<NumberConvertForm::CHECKSUM_Mode>();
     for(auto i = 0; i < me.keyCount(); ++i)
         ui->comboBox_CheckSum->addItem(me.key(i));
+    ui->checkBox_Checksum_ByteOrder->setCheckState(Qt::Checked);
+    ui->lineEdit_Checksum->setPlaceholderText("Hex输出！");
+    ui->lineEdit_Checksum->setFocusPolicy(Qt::NoFocus);
+    ui->lineEdit_Checksum_Dec->setPlaceholderText("Dec输出！");
+    ui->lineEdit_Checksum_Dec->setFocusPolicy(Qt::NoFocus);
+    ui->textEdit_ChecksumInput->setPlaceholderText("请输入十六进制字符数据！");
 
 }
 
@@ -447,33 +453,7 @@ void NumberConvertForm::on_checkBox_FormatData_stateChanged(int arg1)
 
 void NumberConvertForm::on_textEdit_ByteString_textChanged()
 {
-    QTextCursor cursor = ui->textEdit_ByteString->textCursor();   // 光标
-    quint16 lineNum = cursor.blockNumber(); // 行号
-    quint16 posInBlock = cursor.positionInBlock(); // 光标所在行的位置，从左边开始计算
-    QString lineText = ui->textEdit_ByteString->document()->findBlockByLineNumber(lineNum).text();
-
-    /* 按回车会新开一行，如果判断光标在行首位置且行号大于0则认为新开一行，把光标向下移动一行*/
-    if(posInBlock == 0 && lineNum > 0)
-    {
-        cursor.movePosition(QTextCursor::Down);
-        ui->textEdit_ByteString->setTextCursor(cursor);
-        return;
-    }
-    char ch = ' ';
-    // 光标所在行的位置大于等于1，才取前一个字符，这是为了预防按下Backspace键回退到一行开始处的位置，会导致lineText.at(posInBlock-1)访问越界
-    if(posInBlock >= 1)
-    {
-        ch = lineText.at(posInBlock-1).toLatin1();
-    }
-    if((ch == ' ') || (ch >= '0' && ch <='9') || (ch >='a' && ch <= 'f') || (ch >='A' && ch <= 'F'))
-    {
-        return;
-    }
-    else
-    {
-        cursor.deletePreviousChar();
-        ui->textEdit_ByteString->setTextCursor(ui->textEdit_ByteString->textCursor());
-    }
+    HexCharInput(ui->textEdit_ByteString);
 }
 
 quint16 NumberConvertForm::CRC16_USB(char *data, quint16 dataLen)
@@ -804,8 +784,31 @@ quint16 NumberConvertForm::CHECKSUM_16(char *data, quint16 dataLen)
     quint16 count = dataLen;
     while (count >= 2)
     {
-        sum += *((quint16*)addr);
-        (quint16*)(addr++);
+        sum += *(quint16*)(addr++);
+        count -= 2;
+    }
+    if(count == 1)
+    {
+        addr++;
+        sum += *((quint8*)addr);
+    }
+
+    // 将16位校验和折算为8位（低8位+高8位）
+    while(sum >> 16)
+        sum = (sum & 0xFFFF) + (sum >> 16);
+
+    return (quint16)sum;
+}
+
+quint16 NumberConvertForm::CHECKSUM_16_REVERSE(char *data, quint16 dataLen)
+{
+    quint32 sum = 0;
+    quint16* addr = (quint16*)data;
+    quint16 count = dataLen;
+    while (count >= 2)
+    {
+        sum += *(quint16*)(addr++);
+//        (quint16*)(addr++);
         count -= 2;
     }
     if(count == 1)
@@ -1178,6 +1181,39 @@ void NumberConvertForm::DisPlay_CRC32_Configation_List()
     }
 }
 
+// 只接受十六进制字符输入 20221114
+void NumberConvertForm::HexCharInput(QTextEdit *textEdit)
+{
+    QTextCursor cursor = textEdit->textCursor();   // 光标
+    quint16 lineNum = cursor.blockNumber(); // 行号
+    quint16 posInBlock = cursor.positionInBlock(); // 光标所在行的位置，从左边开始计算
+    QString lineText = textEdit->document()->findBlockByLineNumber(lineNum).text();
+
+    /* 按回车会新开一行，如果判断光标在行首位置且行号大于0则认为新开一行，把光标向下移动一行*/
+    if(posInBlock == 0 && lineNum > 0)
+    {
+        cursor.movePosition(QTextCursor::Down);
+        textEdit->setTextCursor(cursor);
+        return;
+    }
+    char ch = ' ';
+    // 光标所在行的位置大于等于1，才取前一个字符，这是为了预防按下Backspace键回退到一行开始处的位置，会导致lineText.at(posInBlock-1)访问越界
+    if(posInBlock >= 1)
+    {
+        ch = lineText.at(posInBlock-1).toLatin1();
+    }
+    if((ch == ' ') || (ch >= '0' && ch <='9') || (ch >='a' && ch <= 'f') || (ch >='A' && ch <= 'F'))
+    {
+        return;
+    }
+    else
+    {
+        cursor.deletePreviousChar();
+        textEdit->setTextCursor(textEdit->textCursor());
+    }
+
+}
+
 // 产生MD5校验码 20221107
 void NumberConvertForm::on_pushButton_Generate_MD5_clicked()
 {
@@ -1373,44 +1409,36 @@ void NumberConvertForm::on_pushButton_Generate_Checksum_clicked()
     QByteArray ba = tcInstance.HexStringToByteArray(hexStr);
     char* pCheckSum = ba.data();    // QByteArray转char*
     quint8 ret8 = 0;
-    quint8 ret16 = 0;
+    quint16 ret16 = 0;
     QString methodName = ui->comboBox_CheckSum->currentText().toUpper();
     bool callResult = false;
     QString checksum = "";
     switch (ui->comboBox_CheckSum->currentIndex())
     {
     case 0: // 处理Checksum_8
-        callResult = QMetaObject::invokeMethod(&NumberConvertForm::getDCFInstance(), methodName.toLatin1().data(),
-                                               Qt :: AutoConnection, Q_RETURN_ARG(quint8, ret8),
-                                               Q_ARG(char*, pCheckSum), Q_ARG(quint16, ba.size()));
-        checksum = tcInstance.DecToHexString(ret8, 1, !checksumByteOrder);
-        ui->lineEdit_Checksum_Dec->setText(QString::number(ret8));
-        ui->lineEdit_Checksum->setText(checksum);
-        ui->textEdit_ChecksumInput->setText(tcInstance.StringNoNullToNull(hexStr+checksum));
-        break;
     case 1: // 处理CHECKSUM_8_REVERSE
         callResult = QMetaObject::invokeMethod(&NumberConvertForm::getDCFInstance(), methodName.toLatin1().data(),
                                                Qt :: AutoConnection, Q_RETURN_ARG(quint8, ret8),
                                                Q_ARG(char*, pCheckSum), Q_ARG(quint16, ba.size()));
-        checksum = tcInstance.DecToHexString(ret8, 1, !checksumByteOrder);
         ui->lineEdit_Checksum_Dec->setText(QString::number(ret8));
-        ui->lineEdit_Checksum->setText(checksum);
+        checksum = tcInstance.DecToHexString(ret8, 1, checksumByteOrder);
         ui->textEdit_ChecksumInput->setText(tcInstance.StringNoNullToNull(hexStr+checksum));
+        checksum = QString("%1").arg(ret8, 2, 16, QLatin1Char('0')).toUpper();
+        ui->lineEdit_Checksum->setText("0x" + checksum);
         break;
     case 2: // 处理Checksum_16
-//        callResult = QMetaObject::invokeMethod(&NumberConvertForm::getDCFInstance(), methodName.toLatin1().data(),
-//                                               Qt :: AutoConnection, Q_RETURN_ARG(quint16, ret16),
-//                                               Q_ARG(char*, pCheckSum), Q_ARG(quint16, ba.size()));
-        checksum = tcInstance.DecToHexString(ret8, 1, !checksumByteOrder);
-        ui->lineEdit_Checksum_Dec->setText(QString::number(ret8));
-        ui->lineEdit_Checksum->setText(checksum);
+    case 3: // 处理CHECKSUM_16_REVERSE
+        callResult = QMetaObject::invokeMethod(&NumberConvertForm::getDCFInstance(), methodName.toLatin1().data(),
+                                               Qt :: AutoConnection, Q_RETURN_ARG(quint16, ret16),
+                                               Q_ARG(char*, pCheckSum), Q_ARG(quint16, ba.size()));
+        ui->lineEdit_Checksum_Dec->setText(QString::number(ret16));
+        checksum = tcInstance.DecToHexString(ret16, 2, !checksumByteOrder);
         ui->textEdit_ChecksumInput->setText(tcInstance.StringNoNullToNull(hexStr+checksum));
+        checksum = QString("%1").arg(ret16, 4, 16, QLatin1Char('0')).toUpper();
+        ui->lineEdit_Checksum->setText("0x" + checksum);
         break;
-    case 3: // 处理其它子节长度，如MD5算法
-
-        return;
     default:
-        ;
+        break;
     }
     if(!callResult)
     {
@@ -1419,3 +1447,45 @@ void NumberConvertForm::on_pushButton_Generate_Checksum_clicked()
     }
 }
 
+
+void NumberConvertForm::on_checkBox_Checksum_ByteOrder_stateChanged(int arg1)
+{
+    if(arg1 == 2)
+    {
+        ui->checkBox_Checksum_ByteOrder->setText("大端");
+        checksumByteOrder = true;
+    }
+    else
+    {
+        ui->checkBox_Checksum_ByteOrder->setText("小端");
+        checksumByteOrder = false;
+    }
+}
+
+void NumberConvertForm::on_checkBox_Checksum_FormatData_stateChanged(int arg1)
+{
+    QString sendStr = ui->textEdit_ChecksumInput->toPlainText();
+    if(arg1 == 2)
+    {
+        QByteArray ba = tcInstance.HexStringToByteArray(sendStr);
+        sendStr = ba.toHex(' ').data();
+    }
+    else if(arg1 == 0)
+    {
+        sendStr = sendStr.remove(" ");
+    }
+    ui->textEdit_ChecksumInput->setText(sendStr.toUpper());
+}
+
+// 清空Checksum输入和输出文本框 20221114
+void NumberConvertForm::on_pushButton_Clear_Checksum_clicked()
+{
+    ui->textEdit_ChecksumInput->clear();
+    ui->lineEdit_Checksum->clear();
+    ui->lineEdit_Checksum_Dec->clear();
+}
+
+void NumberConvertForm::on_textEdit_ChecksumInput_textChanged()
+{
+    HexCharInput(ui->textEdit_ChecksumInput);
+}

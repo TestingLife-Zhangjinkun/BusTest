@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QButtonGroup>
 #include "typeconvert.h"
+#include <QTextEdit>
 
 namespace Ui {
 class NumberConvertForm;
@@ -59,6 +60,7 @@ public:
         Checksum_8 = 0,
         Checksum_8_REVERSE,
         Checksum_16,
+        Checksum_16_REVERSE,
     };
 
     Q_ENUM(CRC8_Mode)
@@ -93,6 +95,7 @@ public:
     Q_INVOKABLE quint8 CHECKSUM_8(char *data, quint16 dataLen);
     Q_INVOKABLE quint8 CHECKSUM_8_REVERSE(char *data, quint16 dataLen);
     Q_INVOKABLE quint16 CHECKSUM_16(char *data, quint16 dataLen);
+    Q_INVOKABLE quint16 CHECKSUM_16_REVERSE(char *data, quint16 dataLen);
 
 
 private slots:
@@ -124,6 +127,14 @@ private slots:
 
     void on_pushButton_Generate_Checksum_clicked();
 
+    void on_checkBox_Checksum_ByteOrder_stateChanged(int arg1);
+
+    void on_checkBox_Checksum_FormatData_stateChanged(int arg1);
+
+    void on_pushButton_Clear_Checksum_clicked();
+
+    void on_textEdit_ChecksumInput_textChanged();
+
 private:
     void InvertUint16(quint16 *destUShort, quint16 *srcUShort);
     void InvertUint8(quint8 *destUch, quint8 *srcUch);
@@ -132,6 +143,8 @@ private:
     void DisPlay_CRC8_Configation_List();
     void DisPlay_CRC16_Configation_List();
     void DisPlay_CRC32_Configation_List();
+    // 只接受十六进制字符输入
+    void HexCharInput(QTextEdit* textEdit);
 
     Ui::NumberConvertForm *ui;
 
@@ -148,8 +161,8 @@ private:
     bool  md5DataType = true;
     QButtonGroup *dataTypeGroup = nullptr;
 
-    // false：小端存储；true：大端存储。缺省为小端存储
-    bool  checksumByteOrder = false;
+    // false：小端存储；true：大端存储。缺省为大端存储
+    bool  checksumByteOrder = true;
 
 };
 
