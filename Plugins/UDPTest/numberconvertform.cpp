@@ -824,6 +824,31 @@ quint16 NumberConvertForm::CHECKSUM_16_REVERSE(char *data, quint16 dataLen)
     return (quint16)(~sum);
 }
 
+// 和校验  20221114
+quint8 NumberConvertForm::SUMCHECK_8(char *data, quint16 dataLen)
+{
+    quint8 sum = 0;
+
+    while (dataLen--)
+        sum += *(quint8*)(data++);
+
+    return sum;
+}
+
+// 异或校验 20221114
+quint8 NumberConvertForm::XOR_8(char *data, quint16 dataLen)
+{
+    if(dataLen == 1)
+        return *(quint8*)data;
+
+    quint8 xorResult = *(quint8*)(data++);
+
+    while (--dataLen)
+        xorResult ^= *(quint8*)(data++);
+
+    return xorResult;
+}
+
 //这里为了效率，我们不需要将所有Refin和refout为true的输入输出数据移位转换
 //只需要将poly二项式转换后，运算时将左移变为右移
 quint16 NumberConvertForm::CRC16_CCITT_TRUE(char *data, quint16 dataLen)
@@ -1435,6 +1460,17 @@ void NumberConvertForm::on_pushButton_Generate_Checksum_clicked()
         checksum = tcInstance.DecToHexString(ret16, 2, !checksumByteOrder);
         ui->textEdit_ChecksumInput->setText(tcInstance.StringNoNullToNull(hexStr+checksum));
         checksum = QString("%1").arg(ret16, 4, 16, QLatin1Char('0')).toUpper();
+        ui->lineEdit_Checksum->setText("0x" + checksum);
+        break;
+    case 4: // 处理和校验
+    case 5: // 处理异或校验
+        callResult = QMetaObject::invokeMethod(&NumberConvertForm::getDCFInstance(), methodName.toLatin1().data(),
+                                               Qt :: AutoConnection, Q_RETURN_ARG(quint8, ret8),
+                                               Q_ARG(char*, pCheckSum), Q_ARG(quint16, ba.size()));
+        ui->lineEdit_Checksum_Dec->setText(QString::number(ret8));
+        checksum = tcInstance.DecToHexString(ret8, 1, checksumByteOrder);
+        ui->textEdit_ChecksumInput->setText(tcInstance.StringNoNullToNull(hexStr+checksum));
+        checksum = QString("%1").arg(ret8, 2, 16, QLatin1Char('0')).toUpper();
         ui->lineEdit_Checksum->setText("0x" + checksum);
         break;
     default:

@@ -61,6 +61,8 @@ public:
         Checksum_8_REVERSE,
         Checksum_16,
         Checksum_16_REVERSE,
+        SumCheck_8,
+        Xor_8,
     };
 
     Q_ENUM(CRC8_Mode)
@@ -96,6 +98,8 @@ public:
     Q_INVOKABLE quint8 CHECKSUM_8_REVERSE(char *data, quint16 dataLen);
     Q_INVOKABLE quint16 CHECKSUM_16(char *data, quint16 dataLen);
     Q_INVOKABLE quint16 CHECKSUM_16_REVERSE(char *data, quint16 dataLen);
+    Q_INVOKABLE quint8 SUMCHECK_8(char *data, quint16 dataLen);
+    Q_INVOKABLE quint8 XOR_8(char *data, quint16 dataLen);
 
 
 private slots:
