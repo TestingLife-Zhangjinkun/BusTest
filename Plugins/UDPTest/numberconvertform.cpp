@@ -25,6 +25,8 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     // 设置选中行的背景色
     ui->tableWidget->setStyleSheet("selection-background-color:rgb(30, 144, 255)");
+    // 设置选中行背景色
+//    ui->tableWidget->setStyleSheet("selection-background-color:blue");
     // 设置不可编辑
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     // 设置可以选中单行
@@ -37,8 +39,6 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     //    ui->tableWidget->verticalHeader()->setVisible(false);
     // 设置表头高度
     ui->tableWidget->horizontalHeader()->setFixedHeight(30);
-    // 设置选中行背景色
-    //    ui->tableWidget->setStyleSheet("selection-background-color:blue");
     // 设置表头 背景色
     //    ui->tableWidget->horizontalHeader()->setStyleSheet("QHeaderView::section{background:red;}");
 
@@ -174,6 +174,7 @@ void NumberConvertForm::on_comboBox_ChecksumLength_currentIndexChanged(int index
     default:
         break;
     }
+    emit ui->comboBox_CheckAlgorithm->activated(ui->comboBox_CheckAlgorithm->currentIndex());
 }
 
 
@@ -1473,8 +1474,15 @@ void NumberConvertForm::on_pushButton_Clear_Checkcode_clicked()
     ui->lineEdit_Checkcode_Dec->clear();
 }
 
-// 根据选择的CRC算法，切换到对应的CRC配置参数行显示 20221115
-void NumberConvertForm::on_comboBox_CheckAlgorithm_currentIndexChanged(int index)
+// 根据当前选择的CRC算法，切换到对应的CRC配置参数行显示 20221115
+void NumberConvertForm::on_comboBox_CheckAlgorithm_activated(int index)
 {
     ui->tableWidget->selectRow(index);
 }
+
+void NumberConvertForm::on_pushButton_Clear_MD5_clicked()
+{
+    ui->textEdit_MD5Input->clear();
+    ui->textEdit_MD5Output->clear();
+}
+

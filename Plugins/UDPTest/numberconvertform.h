@@ -141,7 +141,9 @@ private slots:
 
     void on_pushButton_Clear_Checkcode_clicked();
 
-    void on_comboBox_CheckAlgorithm_currentIndexChanged(int index);
+    void on_comboBox_CheckAlgorithm_activated(int index);
+
+    void on_pushButton_Clear_MD5_clicked();
 
 private:
     void InvertUint16(quint16 *destUShort, quint16 *srcUShort);

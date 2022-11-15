@@ -228,14 +228,14 @@
    <widget class="QPushButton" name="pushButton_Generate_MD5">
     <property name="geometry">
      <rect>
-      <x>670</x>
+      <x>690</x>
       <y>90</y>
       <width>80</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>产生校验码</string>
+     <string>产生输入校验码</string>
     </property>
    </widget>
    <widget class="QTextEdit" name="textEdit_MD5Output">
@@ -334,6 +334,19 @@
     </property>
     <property name="text">
      <string>格式化</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_Clear_MD5">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>90</y>
+      <width>40</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>清空</string>
     </property>
    </widget>
   </widget>
