@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>5</x>
-     <y>110</y>
+     <y>100</y>
      <width>775</width>
      <height>270</height>
     </rect>
@@ -25,22 +25,22 @@
    <property name="title">
     <string>CRC校验</string>
    </property>
-   <widget class="QTextEdit" name="textEdit_ByteString">
+   <widget class="QTextEdit" name="textEdit_CRCInput">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>500</width>
-      <height>140</height>
+      <width>490</width>
+      <height>115</height>
      </rect>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBox_ChecksumLength">
     <property name="geometry">
      <rect>
-      <x>590</x>
+      <x>580</x>
       <y>20</y>
-      <width>100</width>
+      <width>115</width>
       <height>23</height>
      </rect>
     </property>
@@ -48,7 +48,7 @@
    <widget class="QLabel" name="label_22">
     <property name="geometry">
      <rect>
-      <x>520</x>
+      <x>510</x>
       <y>20</y>
       <width>70</width>
       <height>23</height>
@@ -61,7 +61,7 @@
    <widget class="QLabel" name="label_23">
     <property name="geometry">
      <rect>
-      <x>520</x>
+      <x>510</x>
       <y>50</y>
       <width>70</width>
       <height>23</height>
@@ -74,9 +74,9 @@
    <widget class="QComboBox" name="comboBox_CheckAlgorithm">
     <property name="geometry">
      <rect>
-      <x>590</x>
+      <x>580</x>
       <y>50</y>
-      <width>100</width>
+      <width>115</width>
       <height>23</height>
      </rect>
     </property>
@@ -84,8 +84,8 @@
    <widget class="QPushButton" name="pushButton_Generate_Checkcode">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>80</y>
+      <x>510</x>
+      <y>110</y>
       <width>80</width>
       <height>23</height>
      </rect>
@@ -97,9 +97,9 @@
    <widget class="QLineEdit" name="lineEdit_Checkcode">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>80</y>
-      <width>100</width>
+      <x>700</x>
+      <y>20</y>
+      <width>70</width>
       <height>23</height>
      </rect>
     </property>
@@ -107,8 +107,8 @@
    <widget class="QLabel" name="label_13">
     <property name="geometry">
      <rect>
-      <x>530</x>
-      <y>120</y>
+      <x>580</x>
+      <y>80</y>
       <width>50</width>
       <height>23</height>
      </rect>
@@ -120,8 +120,8 @@
    <widget class="QRadioButton" name="radioButton_SmallStorage">
     <property name="geometry">
      <rect>
-      <x>580</x>
-      <y>120</y>
+      <x>625</x>
+      <y>80</y>
       <width>70</width>
       <height>23</height>
      </rect>
@@ -133,8 +133,8 @@
    <widget class="QRadioButton" name="radioButton_BigStorage">
     <property name="geometry">
      <rect>
-      <x>660</x>
-      <y>120</y>
+      <x>700</x>
+      <y>80</y>
       <width>70</width>
       <height>23</height>
      </rect>
@@ -146,47 +146,60 @@
    <widget class="QCheckBox" name="checkBox_FormatData">
     <property name="geometry">
      <rect>
-      <x>530</x>
-      <y>140</y>
-      <width>100</width>
+      <x>510</x>
+      <y>80</y>
+      <width>60</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>格式化数据</string>
+     <string>格式化</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_Checkcode_Dec">
     <property name="geometry">
      <rect>
-      <x>710</x>
-      <y>80</y>
-      <width>60</width>
-      <height>20</height>
+      <x>700</x>
+      <y>50</y>
+      <width>70</width>
+      <height>23</height>
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_ShowCRCParams">
+   <widget class="QPushButton" name="pushButton_UpdateCRCParams">
     <property name="geometry">
      <rect>
-      <x>630</x>
-      <y>140</y>
+      <x>650</x>
+      <y>110</y>
       <width>120</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>显示校验配置列表</string>
+     <string>重新加载CRC参数</string>
     </property>
    </widget>
    <widget class="QTableWidget" name="tableWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>165</y>
-      <width>780</width>
-      <height>100</height>
+      <y>140</y>
+      <width>760</width>
+      <height>125</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_Clear_Checkcode">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>110</y>
+      <width>40</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>清空</string>
     </property>
    </widget>
   </widget>
@@ -208,15 +221,15 @@
       <x>10</x>
       <y>20</y>
       <width>490</width>
-      <height>60</height>
+      <height>55</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_Generate_MD5">
     <property name="geometry">
      <rect>
-      <x>680</x>
-      <y>65</y>
+      <x>670</x>
+      <y>90</y>
       <width>80</width>
       <height>23</height>
      </rect>
@@ -231,7 +244,7 @@
       <x>620</x>
       <y>20</y>
       <width>150</width>
-      <height>40</height>
+      <height>55</height>
      </rect>
     </property>
    </widget>
@@ -239,7 +252,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>87</y>
+      <y>85</y>
       <width>490</width>
       <height>23</height>
      </rect>
@@ -261,14 +274,14 @@
    <widget class="QPushButton" name="pushButton_Generate_MD5_2">
     <property name="geometry">
      <rect>
-      <x>680</x>
-      <y>87</y>
+      <x>560</x>
+      <y>90</y>
       <width>80</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>产生校验码</string>
+     <string>产生文件校验码</string>
     </property>
    </widget>
    <widget class="QRadioButton" name="radioButton_ASCII">

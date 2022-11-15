@@ -103,7 +103,7 @@ public:
 
 
 private slots:
-    void on_pushButton_ShowCRCParams_clicked();
+    void on_pushButton_UpdateCRCParams_clicked();
 
     void on_comboBox_ChecksumLength_currentIndexChanged(int index);
 
@@ -114,7 +114,7 @@ private slots:
 
     void on_checkBox_FormatData_stateChanged(int arg1);
 
-    void on_textEdit_ByteString_textChanged();
+    void on_textEdit_CRCInput_textChanged();
 
     void on_pushButton_Generate_MD5_clicked();
 
@@ -139,6 +139,10 @@ private slots:
 
     void on_textEdit_ChecksumInput_textChanged();
 
+    void on_pushButton_Clear_Checkcode_clicked();
+
+    void on_comboBox_CheckAlgorithm_currentIndexChanged(int index);
+
 private:
     void InvertUint16(quint16 *destUShort, quint16 *srcUShort);
     void InvertUint8(quint8 *destUch, quint8 *srcUch);
@@ -149,6 +153,8 @@ private:
     void DisPlay_CRC32_Configation_List();
     // 只接受十六进制字符输入
     void HexCharInput(QTextEdit* textEdit);
+    // 初始化CRC校验配置参数
+    void Init_CRC_Config_Params();
 
     Ui::NumberConvertForm *ui;
 

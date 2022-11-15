@@ -23,6 +23,8 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     //    ui->tableWidget->setColumnCount(6);
     // 设置整行选中的方式
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    // 设置选中行的背景色
+    ui->tableWidget->setStyleSheet("selection-background-color:rgb(30, 144, 255)");
     // 设置不可编辑
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     // 设置可以选中单行
@@ -68,110 +70,11 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     //设置行距
     //    ui->tableWidget->verticalHeader()->setDefaultSectionSize(10);
 
-    // 由于读取Excel文件速度慢，所以打开窗体前读取CRC配置文件一次，保存到Vector中
-    QString fileName = tr("%1/config/data/CRC.xlsx").arg(QDir::currentPath());
-    QFile file(fileName);
-    if(!file.exists())
-    {
-        qInfo().noquote() << fileName << "文件不存在！";
-        return;
-    }
-
-    // Excel应用程序
-    QAxObject *excel = new QAxObject("Excel.Application");
-    // true：操作文件时Excel可见，false：操作文件时Excel不可见
-    excel->dynamicCall("SetVisible(bool)", false);
-    // 所有Excel文件
-    QAxObject *workBooks = excel->querySubObject("WorkBooks");
-    // 按照路径获取文件
-    QAxObject *workBook = workBooks->querySubObject("Open(QString&）", fileName);
-    // 获取文件的所有Sheet页
-    QAxObject *sheets = workBook->querySubObject("WorkSheets");
-    // 获取文件Sheet页
-    QAxObject *usedRange = nullptr;
-    QAxObject *sheet = nullptr;
-    sheet = sheets->querySubObject("Item(QString)", "CRC16");
-    if(nullptr == sheet)
-    {
-        qInfo().noquote() << "CRC16 Sheet页不存在!";
-    }
-    else
-    {
-        // 有数据的矩形区域
-        usedRange = sheet->querySubObject("UsedRange");
-        // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
-        QVariant var = usedRange->dynamicCall("Value");
-        // 保存CRC16配置参数
-        foreach(QVariant varRow, var.toList())
-        {
-            QVector<QString> vecDataRow;
-            foreach(QVariant var, varRow.toList())
-            {
-                vecDataRow.push_back(var.toString());
-            }
-            crc16Data.push_back(vecDataRow);
-        }
-    }
-
-    // 初始化CRC8算法配置QVector
-    sheet = sheets->querySubObject("Item(QString)", "CRC8");
-    if(nullptr == sheet)
-    {
-        qInfo().noquote() << "CRC8 Sheet页不存在!";
-    }
-    else
-    {
-        // 有数据的矩形区域
-        usedRange = sheet->querySubObject("UsedRange");
-        // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
-        QVariant var = usedRange->dynamicCall("Value");
-        // 保存CRC8配置参数
-        foreach(QVariant varRow, var.toList())
-        {
-            QVector<QString> vecDataRow;
-            foreach(QVariant var, varRow.toList())
-            {
-                vecDataRow.push_back(var.toString());
-            }
-            crc8Data.push_back(vecDataRow);
-        }
-    }
-
-    // 初始化CRC32算法配置QVector
-    sheet = sheets->querySubObject("Item(QString)", "CRC32");
-    if(nullptr == sheet)
-    {
-        qInfo().noquote() << "CRC32 Sheet页不存在!";
-    }
-    else
-    {
-        // 有数据的矩形区域
-        usedRange = sheet->querySubObject("UsedRange");
-        // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
-        QVariant var = usedRange->dynamicCall("Value");
-        // 保存CRC32配置参数
-        foreach(QVariant varRow, var.toList())
-        {
-            QVector<QString> vecDataRow;
-            foreach(QVariant var, varRow.toList())
-            {
-                vecDataRow.push_back(var.toString());
-            }
-            crc32Data.push_back(vecDataRow);
-        }
-    }
-
-    // 关闭文件
-    workBook->dynamicCall("Close()");
-    excel->dynamicCall("Quit()");
-    if(excel)
-    {
-        delete excel;
-        excel = nullptr;
-    }
+    // 初始化CRC配置参数
+    Init_CRC_Config_Params();
 
     //******************************//
-    QStringList byteLengthList = {"1子节", "2子节", "4子节", "其它"};
+    QStringList byteLengthList = {"1子节", "2子节", "4子节"};
     ui->comboBox_ChecksumLength->blockSignals(true);
     ui->comboBox_ChecksumLength->addItems(byteLengthList);
     ui->comboBox_ChecksumLength->blockSignals(false);
@@ -187,9 +90,6 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     // 绑定信号与槽
     connect(ui->radioButton_SmallStorage, SIGNAL(clicked()), this, SLOT(onRadioClickSelecByteOrder()));
     connect(ui->radioButton_BigStorage, SIGNAL(clicked()), this, SLOT(onRadioClickSelecByteOrder()));
-
-    // 文本框中显示提示信息
-    ui->textEdit_ByteString->setPlaceholderText("请输入十六进制字符数据！");
 
     //zjk 20221108
     // 初始化MD5输入数据类型单选按钮分组
@@ -220,6 +120,13 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     ui->lineEdit_Checksum_Dec->setFocusPolicy(Qt::NoFocus);
     ui->textEdit_ChecksumInput->setPlaceholderText("请输入十六进制字符数据！");
 
+    // CRC校验初始化
+    ui->textEdit_CRCInput->setPlaceholderText("请输入十六进制字符数据！");
+    ui->lineEdit_Checkcode->setPlaceholderText("Hex输出！");
+    ui->lineEdit_Checkcode->setFocusPolicy(Qt::NoFocus);
+    ui->lineEdit_Checkcode_Dec->setPlaceholderText("Dec输出！");
+    ui->lineEdit_Checkcode_Dec->setFocusPolicy(Qt::NoFocus);
+
 }
 
 NumberConvertForm::~NumberConvertForm()
@@ -227,77 +134,12 @@ NumberConvertForm::~NumberConvertForm()
     delete ui;
 }
 
-// 显示CRC校验算法参数配置列表 20221103
-void NumberConvertForm::on_pushButton_ShowCRCParams_clicked()
+// 更新CRC校验配置参数 20221103
+void NumberConvertForm::on_pushButton_UpdateCRCParams_clicked()
 {
-    ui->tableWidget->clear();
-    // 删除表格所有行
-    ui->tableWidget->setRowCount(0);
-    ui->tableWidget->clearContents();
-
-    //    ui->tableWidget->removeRow()
-    // 调整内容大小
-    //    ui->tableWidget->resizeRowsToContents();
-    // 标题头的大小
-    ui->tableWidget->horizontalHeader()->setDefaultSectionSize(200);
-    // 横向先自适应宽度
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    //设置标题头的字体样式
-    QFont font = ui->tableWidget->horizontalHeader()->font();
-    font.setBold(true);
-    ui->tableWidget->horizontalHeader()->setFont(font);
-    //设置充满表宽度
-    ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
-    //设置行距
-    //    ui->tableWidget->verticalHeader()->setDefaultSectionSize(10);
-
-    // 行数、列数
-    const quint16 rowCount = crc16Data.size();
-    quint16 columnCount = 0;
-    if(rowCount > 0)
-        columnCount = crc16Data[0].size();
-    // 只设置列数，行数动态增加
-    ui->tableWidget->setColumnCount(columnCount-1);
-    quint16 rowNo = 0;
-    bool headerFlag = true;
-    for(auto i=0; i<rowCount; ++i)
-    {
-        QStringList header;
-        for(auto j=0; j<columnCount-1; ++j)
-        {
-            // 读取文件首行作为表头
-            if(headerFlag)
-            {
-                //设置标题头的文字
-                header<< crc16Data[i][j];
-                if(j < 5)
-                    continue;
-                else
-                {
-                    ui->tableWidget->setHorizontalHeaderLabels(header);
-                    headerFlag = false;
-                }
-            }
-            else
-            { // 从第2行开始插入表格内容
-                // 处理行首元素时插入新行
-                if(j == 0)
-                    ui->tableWidget->insertRow(rowNo);
-                ui->tableWidget->setItem(rowNo, j, new QTableWidgetItem(crc16Data[i][j]));
-                if(j > 0)
-                    //内容水平垂直居中 Note:要先设置内容，该属性才有效
-                    ui->tableWidget->item(rowNo, j)->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-                if(j == 5)
-                { // 当前行处理完毕，行号+1
-                    ++rowNo;
-                }
-            }
-        }
-    }
-    // 然后设置要根据内容适应宽度的列。Note：需要在表格添加内容之后再设置
-    //    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    //清除表格数据区的内容，但不清除表头
-    //    ui->tableWidget->clearContents();
+    Init_CRC_Config_Params();
+    // 发射信号，模拟QComboBox控件当前索引更改
+    emit ui->comboBox_ChecksumLength->currentIndexChanged(ui->comboBox_ChecksumLength->currentIndex());
 }
 
 // 初始化校验算法下拉列表框
@@ -329,11 +171,6 @@ void NumberConvertForm::on_comboBox_ChecksumLength_currentIndexChanged(int index
         // 显示支持的CRC32算法配置列表
         DisPlay_CRC32_Configation_List();
         break;
-    case 3:
-        me = QMetaEnum::fromType<NumberConvertForm::Hash_Mode>();
-        for(auto i = 0; i < me.keyCount(); ++i)
-            ui->comboBox_CheckAlgorithm->addItem(me.key(i));
-        break;
     default:
         break;
     }
@@ -343,7 +180,7 @@ void NumberConvertForm::on_comboBox_ChecksumLength_currentIndexChanged(int index
 // 产生校验码函数  20221102
 void NumberConvertForm::on_pushButton_Generate_Checkcode_clicked()
 {
-    QString hexStr = ui->textEdit_ByteString->toPlainText();
+    QString hexStr = ui->textEdit_CRCInput->toPlainText();
     QByteArray ba = tcInstance.HexStringToByteArray(hexStr);
     NumberConvertForm& pCRC = NumberConvertForm::getDCFInstance();
     char* pCrcCheckSum = ba.data();    // QByteArray转char*
@@ -371,16 +208,8 @@ void NumberConvertForm::on_pushButton_Generate_Checkcode_clicked()
                                                Q_RETURN_ARG(quint32, ret32),
                                                Q_ARG(char*, pCrcCheckSum), Q_ARG(quint16, ba.size()));
         break;
-    case 3: // 处理其它子节长度，如MD5算法
-    {
-        MD5(ba);
-        ba = QCryptographicHash::hash(tcInstance.HexStringToByteArray(hexStr), QCryptographicHash::Md5);
-        QString md5Result = tcInstance.ByteArrayToHexString(ba);
-        ui->textEdit_ByteString->setText(tcInstance.StringNoNullToNull(hexStr + md5Result));
-    }
-        return;
     default:
-        ;
+        break;
     }
     if(!callResult)
     {
@@ -392,29 +221,29 @@ void NumberConvertForm::on_pushButton_Generate_Checkcode_clicked()
     switch (ui->comboBox_ChecksumLength->currentIndex())
     {
     case 0:
-        qDebug().noquote() << "十进制校验码：" << ret8;
-        checkcode = tcInstance.DecToHexString(ret8, 1, !crcByteOrder);
-        qDebug().noquote() << "十六进制校验码：" << checkcode;
         ui->lineEdit_Checkcode_Dec->setText(QString::number(ret8));
+        checkcode = QString("%1").arg(ret8, 2, 16, QLatin1Char('0')).toUpper();
+        ui->lineEdit_Checkcode->setText("0x" + checkcode);
         break;
     case 1:
-        qDebug().noquote() << "十进制校验码：" << ret16;
-        checkcode = tcInstance.DecToHexString(ret16, 2, !crcByteOrder);
-        qDebug().noquote() << "十六进制校验码：" << checkcode;
+        checkcode = tcInstance.DecToHexString(ret16, 2, false);
+        ui->lineEdit_Checkcode->setText("0x" + checkcode.remove(' '));
+        if(!crcByteOrder)
+            checkcode = tcInstance.DecToHexString(ret16, 2, !crcByteOrder);
         ui->lineEdit_Checkcode_Dec->setText(QString::number(ret16));
         break;
     case 2:
-        qDebug().noquote() << "十进制校验码：" << ret32;
-        checkcode = tcInstance.DecToHexString(ret32, 4, !crcByteOrder);
-        qDebug().noquote() << "十六进制校验码：" << checkcode;
+        // 输出十六进制格式：0xAABBCCDD
+        checkcode = tcInstance.DecToHexString(ret32, 4, false);
+        ui->lineEdit_Checkcode->setText("0x" + checkcode.remove(' '));
+        if(!crcByteOrder)
+            checkcode = tcInstance.DecToHexString(ret32, 4, !crcByteOrder);
         ui->lineEdit_Checkcode_Dec->setText(QString::number(ret32));
         break;
     default:
-        ;
+        break;
     }
-    ui->lineEdit_Checkcode->setText(checkcode);
-    ui->textEdit_ByteString->setText(tcInstance.StringNoNullToNull(hexStr+checkcode));
-
+    ui->textEdit_CRCInput->setText(tcInstance.StringNoNullToNull(hexStr+checkcode));
 }
 
 void NumberConvertForm::onRadioClickSelecByteOrder()
@@ -437,7 +266,7 @@ void NumberConvertForm::onRadioClickSelecByteOrder()
 
 void NumberConvertForm::on_checkBox_FormatData_stateChanged(int arg1)
 {
-    QString sendStr = ui->textEdit_ByteString->toPlainText();
+    QString sendStr = ui->textEdit_CRCInput->toPlainText();
     if(arg1 == 2)
     {
         QByteArray ba = tcInstance.HexStringToByteArray(sendStr);
@@ -447,13 +276,13 @@ void NumberConvertForm::on_checkBox_FormatData_stateChanged(int arg1)
     {
         sendStr = sendStr.remove(" ");
     }
-    ui->textEdit_ByteString->setText(sendStr.toUpper());
+    ui->textEdit_CRCInput->setText(sendStr.toUpper());
 }
 
 
-void NumberConvertForm::on_textEdit_ByteString_textChanged()
+void NumberConvertForm::on_textEdit_CRCInput_textChanged()
 {
-    HexCharInput(ui->textEdit_ByteString);
+    HexCharInput(ui->textEdit_CRCInput);
 }
 
 quint16 NumberConvertForm::CRC16_USB(char *data, quint16 dataLen)
@@ -1239,6 +1068,117 @@ void NumberConvertForm::HexCharInput(QTextEdit *textEdit)
 
 }
 
+// 初始化CRC校验配置参数 20221115
+// 由于读取Excel文件速度慢，所以打开窗体前读取CRC配置文件一次，保存到Vector中
+void NumberConvertForm::Init_CRC_Config_Params()
+{
+    //  每次更新CRC配置参数前，先清空之前保存的数据 20221115
+    crc8Data.clear();
+    crc16Data.clear();
+    crc32Data.clear();
+
+    QString fileName = tr("%1/config/data/CRC.xlsx").arg(QDir::currentPath());
+    QFile file(fileName);
+    if(!file.exists())
+    {
+        qInfo().noquote() << fileName << "文件不存在！";
+        return;
+    }
+
+    // Excel应用程序
+    QAxObject *excel = new QAxObject("Excel.Application");
+    // true：操作文件时Excel可见，false：操作文件时Excel不可见
+    excel->dynamicCall("SetVisible(bool)", false);
+    // 所有Excel文件
+    QAxObject *workBooks = excel->querySubObject("WorkBooks");
+    // 按照路径获取文件
+    QAxObject *workBook = workBooks->querySubObject("Open(QString&）", fileName);
+    // 获取文件的所有Sheet页
+    QAxObject *sheets = workBook->querySubObject("WorkSheets");
+    // 获取文件Sheet页
+    QAxObject *usedRange = nullptr;
+    QAxObject *sheet = nullptr;
+    sheet = sheets->querySubObject("Item(QString)", "CRC16");
+    if(nullptr == sheet)
+    {
+        qInfo().noquote() << "CRC16 Sheet页不存在!";
+    }
+    else
+    {
+        // 有数据的矩形区域
+        usedRange = sheet->querySubObject("UsedRange");
+        // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
+        QVariant var = usedRange->dynamicCall("Value");
+        // 保存CRC16配置参数
+        foreach(QVariant varRow, var.toList())
+        {
+            QVector<QString> vecDataRow;
+            foreach(QVariant var, varRow.toList())
+            {
+                vecDataRow.push_back(var.toString());
+            }
+            crc16Data.push_back(vecDataRow);
+        }
+    }
+
+    // 初始化CRC8算法配置QVector
+    sheet = sheets->querySubObject("Item(QString)", "CRC8");
+    if(nullptr == sheet)
+    {
+        qInfo().noquote() << "CRC8 Sheet页不存在!";
+    }
+    else
+    {
+        // 有数据的矩形区域
+        usedRange = sheet->querySubObject("UsedRange");
+        // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
+        QVariant var = usedRange->dynamicCall("Value");
+        // 保存CRC8配置参数
+        foreach(QVariant varRow, var.toList())
+        {
+            QVector<QString> vecDataRow;
+            foreach(QVariant var, varRow.toList())
+            {
+                vecDataRow.push_back(var.toString());
+            }
+            crc8Data.push_back(vecDataRow);
+        }
+    }
+
+    // 初始化CRC32算法配置QVector
+    sheet = sheets->querySubObject("Item(QString)", "CRC32");
+    if(nullptr == sheet)
+    {
+        qInfo().noquote() << "CRC32 Sheet页不存在!";
+    }
+    else
+    {
+        // 有数据的矩形区域
+        usedRange = sheet->querySubObject("UsedRange");
+        // 获取Sheet中数据，并保存到QVector<QVector<QString>>中
+        QVariant var = usedRange->dynamicCall("Value");
+        // 保存CRC32配置参数
+        foreach(QVariant varRow, var.toList())
+        {
+            QVector<QString> vecDataRow;
+            foreach(QVariant var, varRow.toList())
+            {
+                vecDataRow.push_back(var.toString());
+            }
+            crc32Data.push_back(vecDataRow);
+        }
+    }
+
+    // 关闭文件
+    workBook->dynamicCall("Close()");
+    excel->dynamicCall("Quit()");
+    if(excel)
+    {
+        delete excel;
+        excel = nullptr;
+    }
+}
+
 // 产生MD5校验码 20221107
 void NumberConvertForm::on_pushButton_Generate_MD5_clicked()
 {
@@ -1446,9 +1386,8 @@ void NumberConvertForm::on_pushButton_Generate_Checksum_clicked()
                                                Qt :: AutoConnection, Q_RETURN_ARG(quint8, ret8),
                                                Q_ARG(char*, pCheckSum), Q_ARG(quint16, ba.size()));
         ui->lineEdit_Checksum_Dec->setText(QString::number(ret8));
-        checksum = tcInstance.DecToHexString(ret8, 1, checksumByteOrder);
-        ui->textEdit_ChecksumInput->setText(tcInstance.StringNoNullToNull(hexStr+checksum));
         checksum = QString("%1").arg(ret8, 2, 16, QLatin1Char('0')).toUpper();
+        ui->textEdit_ChecksumInput->setText(tcInstance.StringNoNullToNull(hexStr+checksum));
         ui->lineEdit_Checksum->setText("0x" + checksum);
         break;
     case 2: // 处理Checksum_16
@@ -1524,4 +1463,18 @@ void NumberConvertForm::on_pushButton_Clear_Checksum_clicked()
 void NumberConvertForm::on_textEdit_ChecksumInput_textChanged()
 {
     HexCharInput(ui->textEdit_ChecksumInput);
+}
+
+// 清空CRC输入和输出文本框
+void NumberConvertForm::on_pushButton_Clear_Checkcode_clicked()
+{
+    ui->textEdit_CRCInput->clear();
+    ui->lineEdit_Checkcode->clear();
+    ui->lineEdit_Checkcode_Dec->clear();
+}
+
+// 根据选择的CRC算法，切换到对应的CRC配置参数行显示 20221115
+void NumberConvertForm::on_comboBox_CheckAlgorithm_currentIndexChanged(int index)
+{
+    ui->tableWidget->selectRow(index);
 }
