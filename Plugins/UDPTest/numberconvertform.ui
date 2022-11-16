@@ -19,7 +19,7 @@
      <x>5</x>
      <y>100</y>
      <width>775</width>
-     <height>270</height>
+     <height>280</height>
     </rect>
    </property>
    <property name="title">
@@ -185,7 +185,7 @@
       <x>10</x>
       <y>140</y>
       <width>760</width>
-      <height>125</height>
+      <height>135</height>
      </rect>
     </property>
    </widget>
@@ -229,13 +229,13 @@
     <property name="geometry">
      <rect>
       <x>690</x>
-      <y>90</y>
+      <y>87</y>
       <width>80</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>产生输入校验码</string>
+     <string>生成MD5值</string>
     </property>
    </widget>
    <widget class="QTextEdit" name="textEdit_MD5Output">
@@ -263,25 +263,12 @@
      <rect>
       <x>510</x>
       <y>87</y>
-      <width>40</width>
+      <width>130</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>选择</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_Generate_MD5_2">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
-      <y>90</y>
-      <width>80</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>产生文件校验码</string>
+     <string>选择生成MD5的文件...</string>
     </property>
    </widget>
    <widget class="QRadioButton" name="radioButton_ASCII">
@@ -339,8 +326,8 @@
    <widget class="QPushButton" name="pushButton_Clear_MD5">
     <property name="geometry">
      <rect>
-      <x>640</x>
-      <y>90</y>
+      <x>645</x>
+      <y>87</y>
       <width>40</width>
       <height>23</height>
      </rect>

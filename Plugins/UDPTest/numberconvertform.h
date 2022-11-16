@@ -120,8 +120,6 @@ private slots:
 
     void on_pushButton_Select_File_clicked();
 
-    void on_pushButton_Generate_MD5_2_clicked();
-
     // 选择MD5校验码输入数据类型的两个QRadioButton控件的槽函数
     void onRadioClickSelecDataType();
 
@@ -144,6 +142,8 @@ private slots:
     void on_comboBox_CheckAlgorithm_activated(int index);
 
     void on_pushButton_Clear_MD5_clicked();
+
+    void on_textEdit_MD5Input_textChanged();
 
 private:
     void InvertUint16(quint16 *destUShort, quint16 *srcUShort);
@@ -175,6 +175,10 @@ private:
 
     // false：小端存储；true：大端存储。缺省为大端存储
     bool  checksumByteOrder = true;
+
+    // MD5输入文件大小，小于loadSize，一次性读取所有内容计算MD5值；大于则分段读取文件内容，计算MD5值
+    const qint64 loadSize = 1024*10;
+
 
 };
 

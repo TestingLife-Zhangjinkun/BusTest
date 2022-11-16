@@ -102,7 +102,7 @@ NumberConvertForm::NumberConvertForm(QWidget *parent) :
     connect(ui->radioButton_ASCII, SIGNAL(clicked()), this, SLOT(onRadioClickSelecDataType()));
     connect(ui->radioButton_Hex, SIGNAL(clicked()), this, SLOT(onRadioClickSelecDataType()));
 
-    ui->textEdit_MD5Input->setPlaceholderText("请输入MD5校验输入数据！");
+    ui->textEdit_MD5Input->setPlaceholderText("请输入MD5校验数据！");
     ui->textEdit_MD5Output->setPlaceholderText("输出MD5校验码！");
     ui->lineEdit_File_Data_Source->setFocusPolicy(Qt::NoFocus);
     ui->checkBox_ByteOrder->setCheckState(Qt::Checked);
@@ -1183,43 +1183,37 @@ void NumberConvertForm::Init_CRC_Config_Params()
 // 产生MD5校验码 20221107
 void NumberConvertForm::on_pushButton_Generate_MD5_clicked()
 {
-    QString hexStr = ui->textEdit_MD5Input->toPlainText();
+    QString inputStr = ui->textEdit_MD5Input->toPlainText();
+    if(inputStr.isEmpty())
+    {
+        QMessageBox::information(this, "信息提示", "请输入MD5校验数据！");
+        return;
+    }
+
     QByteArray ba;
     if(md5DataType)
-        ba = tcInstance.HexStringToByteArray(hexStr);
+        ba = tcInstance.HexStringToByteArray(inputStr);
     else
-        ba = hexStr.toUtf8();
+        ba = inputStr.toUtf8();
     ba = QCryptographicHash::hash(ba, QCryptographicHash::Md5);
     // 缺省为大端存储，如果勾选小端存储，则逆序排列校验码
     if(!ui->checkBox_ByteOrder->isChecked())
         std::reverse(ba.begin(), ba.end());
     QString md5Result = tcInstance.ByteArrayToHexString(ba);
     ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
-    ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(hexStr + md5Result));
+    ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(inputStr + md5Result));
 }
 
-// 选择MD5输入文件
+// 选择MD5输入文件，计算文件的MD5校验码 20221116
 void NumberConvertForm::on_pushButton_Select_File_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "打开文件数据源", "", "所有文件(*.*)");
-    if(!fileName.isEmpty())
-        ui->lineEdit_File_Data_Source->setText(fileName);
-}
-
-// 计算文件的MD5校验码 20221107
-void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
-{
-    // 文件内容大小常量，小于loadSize，一次性读取所有内容计算MD5值；大于则分段读取文件内容，计算MD5值
-    const qint64 loadSize = 1024*10;
-    QString fileName = ui->lineEdit_File_Data_Source->text();
+    ui->lineEdit_File_Data_Source->setText(fileName);
     if(fileName.isEmpty())
-    {
-        QMessageBox::information(0, "信息提示", "请先选择数据源文件！");
         return;
-    }
 
     QFile file(fileName);
-    QFileInfo fileInfo(file);
+    QFileInfo fileInfo(fileName);
     if(!file.open(QIODevice::ReadOnly/* | QIODevice::Text*/))
     {   // 文件读取失败
         QString errInfo = tr("读取文件 %1 失败！原因：%2.").arg(fileName).arg(file.errorString());
@@ -1228,49 +1222,42 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
         return;
     }
 
+    qint64 fileSize = fileInfo.size();
+    QByteArray ba;
     QMimeDatabase mimeDatabase;
     QMimeType mimeType = mimeDatabase.mimeTypeForFile(fileName, QMimeDatabase::MatchDefault);
     if(mimeType.name().startsWith("text/"))
     { // 处理文本文件
         // Note：fileInfo.size()返回的是文本文件的字符个数，包括空格符 20221109
-        if(fileInfo.size() < loadSize)
+        qInfo().noquote() << "文本文件类型：" << mimeType.name();
+        if(fileSize < loadSize)
         {
             QTextStream ts(&file);
             ts.setCodec("UTF-8");
             QString hexStr = ts.readAll();
-            QByteArray ba;
             if(md5DataType)
-            { // Hex输入，即对文件内容的十六进制字节串进行MD5校验
+                // Hex输入，即对文件内容的十六进制字节串进行MD5校验
                 ba = tcInstance.HexStringToByteArray(hexStr);
-                ba = QCryptographicHash::hash(ba, QCryptographicHash::Md5);
-            }
             else
-            { // ASCII输入，即对文件进行MD5校验
+                // ASCII输入，即对文件进行MD5校验
                 ba = hexStr.toUtf8();
-                ba = QCryptographicHash::hash(ba, QCryptographicHash::Md5);
-            }
+            ba = QCryptographicHash::hash(ba, QCryptographicHash::Md5);
             // 缺省为大端存储，如果勾选小端存储，则逆序排列校验码
             if(!ui->checkBox_ByteOrder->isChecked())
                 std::reverse(ba.begin(), ba.end());
-            QString md5Result = tcInstance.ByteArrayToHexString(ba);
-            ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
-            ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
         }
         else
         {
             QCryptographicHash hash(QCryptographicHash::Md5);
-            qint64 bytesToWrite = fileInfo.size();
+            qint64 bytesToWrite = fileSize;
             QByteArray buf;
             while(bytesToWrite > 0)
             {
                 buf = file.read(qMin(bytesToWrite, loadSize));
                 bytesToWrite -= buf.length();
                 if(md5DataType)
-                {
                     // 将读取的ASCII字符转换为十六进制字节串，再计算MD5
-                    QString str(buf);
-                    buf = tcInstance.HexStringToByteArray(str);
-                }
+                    buf = tcInstance.HexStringToByteArray(QString(buf));
                 hash.addData(buf);
                 buf.resize(0);
             }
@@ -1278,27 +1265,24 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
             // 缺省为大端存储，如果勾选小端存储，则逆序排列校验码
             if(!ui->checkBox_ByteOrder->isChecked())
                 std::reverse(ba.begin(), ba.end());
-            QString md5Result = tcInstance.ByteArrayToHexString(ba);
-            ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
-            ui->textEdit_MD5Input->setText(tcInstance.StringNoNullToNull(md5Result));
         }
+        ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(tcInstance.ByteArrayToHexString(ba)));
     }
     else if(mimeType.name().startsWith("application/"))
     { // 处理二进制文件
-        qInfo().noquote() << mimeType.name();
-        qint64 fileSize = fileInfo.size();
+        qInfo().noquote() << "二进制文件类型：" << mimeType.name();
         QCryptographicHash hash(QCryptographicHash::Md5);
         char* buf = new char[loadSize];
         qint64 ret = 0;
         QDataStream in(&file);
-        if(fileInfo.size() < loadSize)
+        if(fileSize < loadSize)
         {
             ret = in.readRawData(buf, fileSize);
             hash.addData(buf, ret);
         }
         else
         {
-            qint64 bytesToWrite = fileInfo.size();
+            qint64 bytesToWrite = fileSize;
             while(bytesToWrite > 0)
             {
                 ret = in.readRawData(buf, qMin(bytesToWrite, loadSize));
@@ -1307,12 +1291,11 @@ void NumberConvertForm::on_pushButton_Generate_MD5_2_clicked()
             }
         }
         delete []buf;
-        QByteArray ba = hash.result();
+        ba = hash.result();
         // 缺省为大端存储，如果勾选小端存储，则逆序排列校验码
         if(!ui->checkBox_ByteOrder->isChecked())
             std::reverse(ba.begin(), ba.end());
-        QString md5Result = tcInstance.ByteArrayToHexString(ba);
-        ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(md5Result));
+        ui->textEdit_MD5Output->setText(tcInstance.StringNoNullToNull(tcInstance.ByteArrayToHexString(ba)));
     }
     else
     {
@@ -1486,3 +1469,8 @@ void NumberConvertForm::on_pushButton_Clear_MD5_clicked()
     ui->textEdit_MD5Output->clear();
 }
 
+void NumberConvertForm::on_textEdit_MD5Input_textChanged()
+{
+    if(md5DataType)
+        HexCharInput(ui->textEdit_MD5Input);
+}
